@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ranking Cooperativo HN — Carrera por el Top 10</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{
   --bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;
@@ -228,6 +229,7 @@ function render(){
 
   if(myChart) myChart.destroy();
 
+  Chart.register(ChartDataLabels);
   const ctx=document.getElementById('myChart').getContext('2d');
   myChart=new Chart(ctx,{
     type:'line',
@@ -248,12 +250,16 @@ function render(){
           tension:.3,
           spanGaps:true,
           datalabels:{
+            display:true,
             color:'#111827',
-            font:{weight:'900',size:11,family:'Arial'},
-            formatter:v=>v||'',
+            backgroundColor:'rgba(255,255,255,0.85)',
+            borderRadius:3,
+            padding:{top:1,bottom:1,left:3,right:3},
+            font:{weight:'900',size:10,family:'Arial'},
+            formatter:v=>v?'#'+v:'',
             anchor:'end',
             align:'top',
-            offset:2
+            offset:4
           }
         },
         {
@@ -269,12 +275,16 @@ function render(){
           tension:.3,
           spanGaps:true,
           datalabels:{
+            display:true,
             color:'#16a34a',
-            font:{weight:'900',size:11,family:'Arial'},
-            formatter:v=>v||'',
+            backgroundColor:'rgba(255,255,255,0.85)',
+            borderRadius:3,
+            padding:{top:1,bottom:1,left:3,right:3},
+            font:{weight:'900',size:10,family:'Arial'},
+            formatter:v=>v?'#'+v:'',
             anchor:'start',
             align:'bottom',
-            offset:2
+            offset:4
           }
         }
       ]
@@ -284,6 +294,7 @@ function render(){
       maintainAspectRatio:false,
       interaction:{mode:'index',intersect:false},
       plugins:{
+        datalabels:{},
         legend:{display:false},
         tooltip:{
           backgroundColor:'#fff',
