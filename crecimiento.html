@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ranking Cooperativo HN — Crecimiento</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
 :root{
   --bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;
@@ -317,68 +318,137 @@ function render(){
 }
 
 function renderTrend(){
+  Chart.register(ChartDataLabels);
   const d=DATA[metrica];
-  const labels=d.periodos.map(fmtP);
+  const periodos=d.periodos;
+  const labels=periodos.map(fmtP);
   const top20=d.top20;
+  const N=periodos.length-1;
+  const trimestral=new Set([3,6,9,12]);
 
   if(trendChart) trendChart.destroy();
 
+  // Vecinos correctos de CAYCSOL
+  const rankingActual=[...top20].sort((a,b)=>{
+    const va=(d.series[a]||[]).filter(v=>v!==null).slice(-1)[0]||0;
+    const vb=(d.series[b]||[]).filter(v=>v!==null).slice(-1)[0]||0;
+    return vb-va;
+  });
+  const cayIdx=rankingActual.indexOf('CAYCSOL');
+  const neighbors=new Set(['CAYCSOL']);
+  if(cayIdx>1)  neighbors.add(rankingActual[cayIdx-2]);
+  if(cayIdx>0)  neighbors.add(rankingActual[cayIdx-1]);
+  if(cayIdx<rankingActual.length-1) neighbors.add(rankingActual[cayIdx+1]);
+  if(cayIdx<rankingActual.length-2) neighbors.add(rankingActual[cayIdx+2]);
+
+  const palette={'CAYCSOL':'#16a34a'};
+  const cols=['#1d4ed8','#dc2626','#d97706','#7c3aed'];
+  let ci=0;
+  neighbors.forEach(c=>{if(c!=='CAYCSOL') palette[c]=cols[ci++];});
+
+  // Calcular diferencia mes a mes (delta)
+  function toDelta(vals){
+    return vals.map((v,i)=>{
+      if(i===0||v===null) return null;
+      const prev=vals[i-1];
+      if(prev===null) return null;
+      return v-prev;
+    });
+  }
+
+  function fmtVal(v){
+    if(v===null) return '';
+    if(metrica==='bg') return fmtM(v);
+    return v.toLocaleString();
+  }
+
+  function showLabel(ctx){
+    const p=periodos[ctx.dataIndex];
+    if(!p) return false;
+    const mes=parseInt(p.split('-')[1]);
+    return ctx.dataIndex===0||ctx.dataIndex===N||trimestral.has(mes);
+  }
+
   const datasets=top20.map(coop=>{
     const isCay=coop==='CAYCSOL';
+    const isNeigh=neighbors.has(coop);
+    const color=isNeigh?(palette[coop]||'#1d4ed8'):'#e2e8f0';
+    const raw=d.series[coop]||[];
+    const delta=toDelta(raw);
+
     return {
       label:coop,
-      data:d.series[coop],
-      borderColor:isCay?'#16a34a':'#cbd5e1',
+      data:delta,
+      rawData:raw,
+      borderColor:color,
       backgroundColor:'transparent',
-      borderWidth:isCay?3:1.5,
-      pointRadius:isCay?4:0,
-      pointHoverRadius:5,
-      pointBackgroundColor:isCay?'#16a34a':'#64748b',
+      borderWidth:isCay?3:isNeigh?2:1,
+      pointRadius:isNeigh?4:1,
+      pointHoverRadius:6,
+      pointBackgroundColor:color,
       tension:.35,
       spanGaps:true,
-      order:isCay?0:1,
-      // guardamos isCay para los hover handlers
-      caycsol:isCay
+      order:isCay?0:isNeigh?1:2,
+      highlight:isNeigh,
+      caycsol:isCay,
+      datalabels:{
+        display:(ctx)=>isNeigh&&showLabel(ctx),
+        color:color,
+        backgroundColor:'rgba(255,255,255,0.9)',
+        borderRadius:3,
+        padding:{top:1,bottom:1,left:3,right:3},
+        font:{size:9,weight:'700',family:'Arial'},
+        formatter:(v)=>v===null?'':fmtVal(v),
+        anchor:isCay?'end':'start',
+        align:isCay?'top':'bottom',
+        offset:4
+      }
+    };
+  });
+
+  // Dataset fantasma para etiquetas de nombre al final de cada línea vecina
+  // Lo hacemos con datalabels en el último punto visible
+  const nameLabels=top20.filter(c=>neighbors.has(c)).map(coop=>{
+    const isCay=coop==='CAYCSOL';
+    const color=palette[coop]||'#1d4ed8';
+    const raw=d.series[coop]||[];
+    const delta=toDelta(raw);
+    return {
+      label:'__name_'+coop,
+      data:delta,
+      borderColor:'transparent',
+      backgroundColor:'transparent',
+      borderWidth:0,
+      pointRadius:0,
+      pointHoverRadius:0,
+      spanGaps:true,
+      order:0,
+      highlight:true,
+      caycsol:isCay,
+      datalabels:{
+        display:(ctx)=>ctx.dataIndex===N,
+        color:color,
+        font:{size:10,weight:'700',family:'Arial'},
+        formatter:()=>coop,
+        anchor:'end',
+        align:'right',
+        offset:6,
+        clip:false
+      }
     };
   });
 
   const ctx=document.getElementById('trendChart').getContext('2d');
   trendChart=new Chart(ctx,{
     type:'line',
-    data:{labels,datasets},
+    data:{labels,datasets:[...datasets,...nameLabels]},
     options:{
       responsive:true,
       maintainAspectRatio:false,
-      interaction:{mode:'nearest',intersect:false,axis:'x'},
-      onHover:(evt,elements)=>{
-        if(!elements.length){
-          // Restaurar todo
-          trendChart.data.datasets.forEach(ds=>{
-            ds.borderColor=ds.caycsol?'#16a34a':'#cbd5e1';
-            ds.borderWidth=ds.caycsol?3:1.5;
-            ds.pointRadius=ds.caycsol?4:0;
-          });
-        } else {
-          const idx=elements[0].datasetIndex;
-          trendChart.data.datasets.forEach((ds,i)=>{
-            if(ds.caycsol){
-              ds.borderColor='#16a34a';
-              ds.borderWidth=3;
-              ds.pointRadius=4;
-            } else if(i===idx){
-              ds.borderColor='#1d4ed8';
-              ds.borderWidth=2.5;
-              ds.pointRadius=4;
-            } else {
-              ds.borderColor='#e2e8f0';
-              ds.borderWidth=1;
-              ds.pointRadius=0;
-            }
-          });
-        }
-        trendChart.update('none');
-      },
+      layout:{padding:{top:20,right:140,bottom:8,left:8}},
+      interaction:{mode:'index',intersect:false},
       plugins:{
+        datalabels:{},
         legend:{display:false},
         tooltip:{
           backgroundColor:'#fff',
@@ -387,15 +457,20 @@ function renderTrend(){
           borderColor:'#dde1ea',
           borderWidth:1,
           padding:10,
-          filter:item=>{
-            // Solo mostrar CAYCSOL y la línea hover
-            return item.dataset.caycsol || item.datasetIndex===item.chart._hoveredDatasetIndex;
+          titleFont:{family:'Arial',size:12,weight:'700'},
+          bodyFont:{family:'Arial',size:11},
+          filter:(item)=>{
+            return (item.dataset.highlight||item.dataset.caycsol)&&!item.dataset.label.startsWith('__name_');
           },
           callbacks:{
-            label:ctx=>{
+            title:(items)=>items[0].label,
+            label:(ctx)=>{
+              if(ctx.dataset.label.startsWith('__name_')) return null;
               const v=ctx.parsed.y;
-              if(v===null) return null;
-              return ` ${ctx.dataset.label}: ${metrica==='bg'?fmtM(v):v.toLocaleString()}`;
+              if(v===null||v===undefined) return null;
+              const sign=v>=0?'+':'';
+              const formatted=metrica==='bg'?fmtM(v):v.toLocaleString();
+              return ' '+ctx.dataset.label+': '+sign+formatted;
             }
           }
         }
@@ -407,21 +482,47 @@ function renderTrend(){
         },
         y:{
           grid:{color:'#f5f6f8'},
+          title:{
+            display:true,
+            text:'Crecimiento mensual (diferencia vs mes anterior)',
+            font:{family:'Arial',size:10},
+            color:'#9ca3af'
+          },
           ticks:{
-            font:{family:'Arial',size:10},color:'#9ca3af',
-            callback:v=>metrica==='bg'?fmtM(v):v.toLocaleString()
+            font:{family:'Arial',size:10},
+            color:'#9ca3af',
+            callback:(v)=>metrica==='bg'?fmtM(v):v.toLocaleString()
           }
         }
       }
     }
   });
 
-  // Guardar index hover para tooltip
-  trendChart._hoveredDatasetIndex=-1;
-  document.getElementById('trendChart').addEventListener('mousemove',evt=>{
+  // Hover
+  const canvas=document.getElementById('trendChart');
+  canvas.onmousemove=(evt)=>{
     const pts=trendChart.getElementsAtEventForMode(evt,'nearest',{intersect:false},false);
-    trendChart._hoveredDatasetIndex=pts.length?pts[0].datasetIndex:-1;
-  });
+    if(!pts.length) return;
+    const idx=pts[0].datasetIndex;
+    trendChart.data.datasets.forEach((ds,i)=>{
+      if(ds.label.startsWith('__name_')) return;
+      if(ds.caycsol){ds.borderColor='#16a34a';ds.borderWidth=3;ds.pointRadius=4;}
+      else if(i===idx){ds.borderColor='#1d4ed8';ds.borderWidth=2.5;ds.pointRadius=4;}
+      else if(ds.highlight){ds.borderColor=palette[ds.label]||'#94a3b8';ds.borderWidth=2;ds.pointRadius=3;}
+      else{ds.borderColor='#f0f2f5';ds.borderWidth=1;ds.pointRadius=0;}
+    });
+    trendChart.update('none');
+  };
+  canvas.onmouseleave=()=>{
+    trendChart.data.datasets.forEach(ds=>{
+      if(ds.label.startsWith('__name_')) return;
+      const isN=neighbors.has(ds.label);
+      ds.borderColor=isN?(palette[ds.label]||'#94a3b8'):'#e2e8f0';
+      ds.borderWidth=ds.caycsol?3:isN?2:1;
+      ds.pointRadius=isN?4:1;
+    });
+    trendChart.update('none');
+  };
 }
 
 // Init
