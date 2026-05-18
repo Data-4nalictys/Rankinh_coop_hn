@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAYCSOL — Evolución de Afiliados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;
+  --accent:#1a6b4a;--accent-light:#eaf7f1;
+  --blue:#1d4ed8;--pink:#db2777;--green:#16a34a;--purple:#7c3aed;
+  --text:#111827;--text2:#6b7280;--muted:#9ca3af;
+  --sh:0 1px 3px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;overflow:hidden}
+.shell{display:grid;grid-template-columns:192px 1fr;grid-template-rows:56px 1fr;height:100vh}
+@media(max-width:700px){.shell{grid-template-columns:1fr}.sidebar{display:none}}
+
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);
+  box-shadow:var(--sh);flex-wrap:wrap;gap:6px}
+.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1a6b4a,#2d9e6b);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
+.brand-txt{font-size:14px;font-weight:900;color:var(--text)}
+.brand-sub{font-size:10px;color:var(--muted)}
+.period-pill{background:var(--accent-light);border:1px solid #a7d9c0;border-radius:20px;
+  padding:4px 14px;font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap}
+
+.sidebar{background:var(--surface);border-right:1px solid var(--border);
+  padding:14px 0;display:flex;flex-direction:column;overflow:hidden}
+.nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;
+  color:var(--muted);text-transform:uppercase}
+.nav-sec:first-child{padding-top:0}
+.nav-a{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:700;
+  color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:.1s}
+.nav-a:hover{color:var(--text);background:var(--bg)}
+.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.nav-icon{width:15px;text-align:center;font-size:12px}
+.nav-sep{height:1px;background:var(--border);margin:8px 14px}
+.nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);
+  font-size:9px;color:var(--muted);line-height:1.7}
+
+.main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+
+.ph{padding:14px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;
+  flex-shrink:0;flex-wrap:wrap;gap:8px}
+.ph-title{font-size:20px;font-weight:900;color:var(--text)}
+.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* KPI ROW */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:0 20px 12px;flex-shrink:0}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:500px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;
+  padding:10px 16px;box-shadow:var(--sh);text-align:center}
+.kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:4px}
+.kpi-val{font-size:24px;font-weight:900;line-height:1}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.kpi-total .kpi-val{color:var(--text)}
+.kpi-h .kpi-val{color:var(--blue)}
+.kpi-m .kpi-val{color:var(--pink)}
+.kpi-k .kpi-val{color:var(--green)}
+.kpi-j .kpi-val{color:var(--purple)}
+
+/* CHART AREA */
+.chart-wrap{flex:1;padding:0 20px 16px;min-height:0;position:relative}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+  box-shadow:var(--sh);height:100%;padding:16px;display:flex;flex-direction:column}
+.chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.chart-sub{font-size:10px;color:var(--muted);margin-bottom:12px}
+.chart-canvas-wrap{flex:1;position:relative;min-height:0}
+canvas{width:100%!important;height:100%!important}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo">HN</div>
+    <div>
+      <div class="brand-txt">Ranking Cooperativo Honduras</div>
+      <div class="brand-sub">Superintendencia de Cooperativas — CONSUCOOP</div>
+    </div>
+  </div>
+  <div class="period-pill" id="periodLabel">—</div>
+</header>
+
+<nav class="sidebar">
+  <div class="nav-sec">Rankings</div>
+  <a class="nav-a" href="afiliados.html"><span class="nav-icon">👥</span>Afiliados</a>
+  <a class="nav-a" href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
+  <a class="nav-a" href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
+  <a class="nav-a" href="pasivos.html"><span class="nav-icon">📊</span>Pasivos</a>
+  <div class="nav-sec">Resultados</div>
+  <a class="nav-a" href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
+  <a class="nav-a" href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
+  <a class="nav-a" href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">CAYCSOL</div>
+  <a class="nav-a active" href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
+  <div class="nav-footer">Fuente: CONSUCOOP<br>Datos preliminares sujetos a revisión</div>
+</nav>
+
+<main class="main">
+  <div class="ph">
+    <div>
+      <div class="ph-title">CAYCSOL — Evolución de Afiliados</div>
+      <div class="ph-sub">Últimos 12 meses · desglose por género</div>
+    </div>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi kpi-h">
+      <div class="kpi-lbl">Hombres</div>
+      <div class="kpi-val" id="kH">—</div>
+      <div class="kpi-sub" id="kHd">—</div>
+    </div>
+    <div class="kpi kpi-m">
+      <div class="kpi-lbl">Mujeres</div>
+      <div class="kpi-val" id="kM">—</div>
+      <div class="kpi-sub" id="kMd">—</div>
+    </div>
+    <div class="kpi kpi-k">
+      <div class="kpi-lbl">Menores</div>
+      <div class="kpi-val" id="kK">—</div>
+      <div class="kpi-sub" id="kKd">—</div>
+    </div>
+    <div class="kpi kpi-j">
+      <div class="kpi-lbl">Jurídicas</div>
+      <div class="kpi-val" id="kJ">—</div>
+      <div class="kpi-sub" id="kJd">—</div>
+    </div>
+    <div class="kpi kpi-total">
+      <div class="kpi-lbl">Total</div>
+      <div class="kpi-val" id="kT">—</div>
+      <div class="kpi-sub" id="kTd">—</div>
+    </div>
+  </div>
+
+  <div class="chart-wrap">
+    <div class="chart-card">
+      <div class="chart-title">Crecimiento de Membresía</div>
+      <div class="chart-sub" id="chartSub">—</div>
+      <div class="chart-canvas-wrap">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const MESES={1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May',6:'Jun',
+  7:'Jul',8:'Ago',9:'Sep',10:'Oct',11:'Nov',12:'Dic'};
+const MESES_L={1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',
+  7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'};
+
+const ALL=[{"periodo": "2019-03", "total": 13413, "hombres": 5497, "mujeres": 6100, "menores": 1764, "juridicas": 52}, {"periodo": "2019-06", "total": 13714, "hombres": 5601, "mujeres": 6219, "menores": 1840, "juridicas": 54}, {"periodo": "2019-09", "total": 16420, "hombres": 6779, "mujeres": 7669, "menores": 1916, "juridicas": 56}, {"periodo": "2019-12", "total": 13124, "hombres": 5378, "mujeres": 5959, "menores": 1736, "juridicas": 51}, {"periodo": "2020-03", "total": 16560, "hombres": 6836, "mujeres": 7727, "menores": 1940, "juridicas": 57}, {"periodo": "2020-06", "total": 14497, "hombres": 5875, "mujeres": 6566, "menores": 51, "juridicas": 2005}, {"periodo": "2020-09", "total": 14553, "hombres": 5888, "mujeres": 6616, "menores": 51, "juridicas": 1998}, {"periodo": "2020-12", "total": 14773, "hombres": 5990, "mujeres": 6721, "menores": 2013, "juridicas": 49}, {"periodo": "2021-03", "total": 15059, "hombres": 6113, "mujeres": 6868, "menores": 2029, "juridicas": 49}, {"periodo": "2021-06", "total": 15467, "hombres": 6275, "mujeres": 7084, "menores": 2061, "juridicas": 47}, {"periodo": "2021-09", "total": 16159, "hombres": 6559, "mujeres": 7401, "menores": 2149, "juridicas": 50}, {"periodo": "2022-03", "total": 16852, "hombres": 6843, "mujeres": 7718, "menores": 2237, "juridicas": 54}, {"periodo": "2022-04", "total": 16991, "hombres": 6901, "mujeres": 7784, "menores": 2253, "juridicas": 53}, {"periodo": "2022-05", "total": 17082, "hombres": 6935, "mujeres": 7822, "menores": 2267, "juridicas": 58}, {"periodo": "2022-06", "total": 17254, "hombres": 6996, "mujeres": 7913, "menores": 2286, "juridicas": 59}, {"periodo": "2022-07", "total": 17334, "hombres": 7017, "mujeres": 7967, "menores": 2290, "juridicas": 60}, {"periodo": "2022-08", "total": 17443, "hombres": 7088, "mujeres": 7999, "menores": 2296, "juridicas": 60}, {"periodo": "2022-09", "total": 17516, "hombres": 7133, "mujeres": 8028, "menores": 2294, "juridicas": 61}, {"periodo": "2022-10", "total": 17786, "hombres": 7231, "mujeres": 8190, "menores": 2304, "juridicas": 61}, {"periodo": "2022-11", "total": 18095, "hombres": 7363, "mujeres": 8350, "menores": 2318, "juridicas": 64}, {"periodo": "2022-12", "total": 18063, "hombres": 7358, "mujeres": 8315, "menores": 2326, "juridicas": 64}, {"periodo": "2023-01", "total": 18290, "hombres": 7453, "mujeres": 8428, "menores": 2345, "juridicas": 64}, {"periodo": "2023-02", "total": 18290, "hombres": 7453, "mujeres": 8428, "menores": 2345, "juridicas": 64}, {"periodo": "2023-03", "total": 18647, "hombres": 7572, "mujeres": 8619, "menores": 2390, "juridicas": 66}, {"periodo": "2023-04", "total": 18738, "hombres": 7618, "mujeres": 8653, "menores": 2401, "juridicas": 66}, {"periodo": "2023-05", "total": 18877, "hombres": 7673, "mujeres": 8722, "menores": 2416, "juridicas": 66}, {"periodo": "2023-06", "total": 19063, "hombres": 7720, "mujeres": 8808, "menores": 2469, "juridicas": 66}, {"periodo": "2023-07", "total": 19265, "hombres": 7780, "mujeres": 8919, "menores": 2504, "juridicas": 62}, {"periodo": "2023-08", "total": 19406, "hombres": 7832, "mujeres": 8990, "menores": 2519, "juridicas": 65}, {"periodo": "2023-09", "total": 19549, "hombres": 7871, "mujeres": 9041, "menores": 2573, "juridicas": 64}, {"periodo": "2023-10", "total": 19660, "hombres": 7894, "mujeres": 9108, "menores": 2594, "juridicas": 64}, {"periodo": "2023-11", "total": 19751, "hombres": 7926, "mujeres": 9151, "menores": 2610, "juridicas": 64}, {"periodo": "2023-12", "total": 19821, "hombres": 7941, "mujeres": 9174, "menores": 2642, "juridicas": 64}, {"periodo": "2024-01", "total": 20845, "hombres": 7972, "mujeres": 9274, "menores": 3534, "juridicas": 65}, {"periodo": "2024-02", "total": 21571, "hombres": 8021, "mujeres": 9361, "menores": 4124, "juridicas": 65}, {"periodo": "2024-03", "total": 21699, "hombres": 8066, "mujeres": 9424, "menores": 4144, "juridicas": 65}, {"periodo": "2024-04", "total": 21825, "hombres": 8132, "mujeres": 9481, "menores": 4147, "juridicas": 65}, {"periodo": "2024-05", "total": 22002, "hombres": 8219, "mujeres": 9561, "menores": 4157, "juridicas": 65}, {"periodo": "2024-06", "total": 22216, "hombres": 8318, "mujeres": 9642, "menores": 4191, "juridicas": 65}, {"periodo": "2024-07", "total": 22544, "hombres": 8456, "mujeres": 9808, "menores": 4215, "juridicas": 65}, {"periodo": "2024-08", "total": 22796, "hombres": 8542, "mujeres": 9949, "menores": 4239, "juridicas": 66}, {"periodo": "2024-09", "total": 23035, "hombres": 8634, "mujeres": 10059, "menores": 4276, "juridicas": 66}, {"periodo": "2024-10", "total": 23296, "hombres": 8737, "mujeres": 10173, "menores": 4320, "juridicas": 66}, {"periodo": "2024-11", "total": 23533, "hombres": 8825, "mujeres": 10284, "menores": 4358, "juridicas": 66}, {"periodo": "2024-12", "total": 24178, "hombres": 9025, "mujeres": 10515, "menores": 4570, "juridicas": 68}, {"periodo": "2025-01", "total": 24956, "hombres": 9281, "mujeres": 10840, "menores": 4767, "juridicas": 68}, {"periodo": "2025-02", "total": 26097, "hombres": 9597, "mujeres": 11317, "menores": 5115, "juridicas": 68}, {"periodo": "2025-03", "total": 27086, "hombres": 9854, "mujeres": 11713, "menores": 5451, "juridicas": 68}, {"periodo": "2025-04", "total": 27926, "hombres": 10120, "mujeres": 12054, "menores": 5682, "juridicas": 70}, {"periodo": "2025-05", "total": 28931, "hombres": 10401, "mujeres": 12400, "menores": 6060, "juridicas": 70}, {"periodo": "2025-06", "total": 29912, "hombres": 10646, "mujeres": 12686, "menores": 6510, "juridicas": 70}, {"periodo": "2025-07", "total": 30949, "hombres": 10949, "mujeres": 13041, "menores": 6889, "juridicas": 70}, {"periodo": "2025-08", "total": 32213, "hombres": 11270, "mujeres": 13423, "menores": 7451, "juridicas": 69}, {"periodo": "2025-09", "total": 33053, "hombres": 11499, "mujeres": 13734, "menores": 7752, "juridicas": 68}, {"periodo": "2025-10", "total": 33852, "hombres": 11732, "mujeres": 14119, "menores": 7932, "juridicas": 69}, {"periodo": "2025-11", "total": 34567, "hombres": 11960, "mujeres": 14432, "menores": 8106, "juridicas": 69}, {"periodo": "2025-12", "total": 35313, "hombres": 12229, "mujeres": 14681, "menores": 8335, "juridicas": 68}, {"periodo": "2026-01", "total": 35999, "hombres": 12489, "mujeres": 14936, "menores": 8503, "juridicas": 71}, {"periodo": "2026-02", "total": 36893, "hombres": 12783, "mujeres": 15309, "menores": 8730, "juridicas": 71}, {"periodo": "2026-03", "total": 37799, "hombres": 13078, "mujeres": 15686, "menores": 8964, "juridicas": 71}];
+const ultimos=ALL.slice(-12);
+
+// KPIs del mes más reciente
+const ultimo=ultimos[ultimos.length-1];
+const anterior=ultimos.length>1?ultimos[ultimos.length-2]:null;
+
+function delta(v,a){
+  if(!a)return '';
+  const d=v-a;
+  return (d>=0?'+':'')+d.toLocaleString();
+}
+
+const[y,m]=ultimo.periodo.split('-');
+document.getElementById('periodLabel').textContent=MESES_L[parseInt(m)]+' '+y;
+
+document.getElementById('kH').textContent=ultimo.hombres.toLocaleString();
+document.getElementById('kM').textContent=ultimo.mujeres.toLocaleString();
+document.getElementById('kK').textContent=ultimo.menores.toLocaleString();
+document.getElementById('kJ').textContent=ultimo.juridicas.toLocaleString();
+document.getElementById('kT').textContent=ultimo.total.toLocaleString();
+
+if(anterior){
+  document.getElementById('kHd').textContent=delta(ultimo.hombres,anterior.hombres)+' vs mes anterior';
+  document.getElementById('kMd').textContent=delta(ultimo.mujeres,anterior.mujeres)+' vs mes anterior';
+  document.getElementById('kKd').textContent=delta(ultimo.menores,anterior.menores)+' vs mes anterior';
+  document.getElementById('kJd').textContent=delta(ultimo.juridicas,anterior.juridicas)+' vs mes anterior';
+  document.getElementById('kTd').textContent=delta(ultimo.total,anterior.total)+' vs mes anterior';
+}
+
+// Labels del eje X
+const labels=ultimos.map(d=>{
+  const[y,m]=d.periodo.split('-');
+  return MESES[parseInt(m)]+' '+y.slice(2);
+});
+
+const primero=ultimos[0];
+document.getElementById('chartSub').textContent=
+  labels[0]+' → '+labels[labels.length-1]+
+  ' · Crecimiento total: +'+(ultimo.total-primero.total).toLocaleString()+' afiliados';
+
+// Crear gráfica
+const ctx=document.getElementById('myChart').getContext('2d');
+new Chart(ctx,{
+  type:'line',
+  data:{
+    labels,
+    datasets:[
+      {
+        label:'Total Afiliados',
+        data:ultimos.map(d=>d.total),
+        borderColor:'#111827',
+        backgroundColor:'rgba(17,24,39,.06)',
+        borderWidth:2.5,
+        pointRadius:4,
+        pointBackgroundColor:'#111827',
+        fill:false,
+        tension:.35,
+        datalabels:{display:false}
+      },
+      {
+        label:'Hombres',
+        data:ultimos.map(d=>d.hombres),
+        borderColor:'#1d4ed8',
+        backgroundColor:'transparent',
+        borderWidth:2,
+        pointRadius:3,
+        pointBackgroundColor:'#1d4ed8',
+        fill:false,
+        tension:.35
+      },
+      {
+        label:'Mujeres',
+        data:ultimos.map(d=>d.mujeres),
+        borderColor:'#db2777',
+        backgroundColor:'transparent',
+        borderWidth:2,
+        pointRadius:3,
+        pointBackgroundColor:'#db2777',
+        fill:false,
+        tension:.35
+      },
+      {
+        label:'Menores',
+        data:ultimos.map(d=>d.menores),
+        borderColor:'#16a34a',
+        backgroundColor:'transparent',
+        borderWidth:2,
+        pointRadius:3,
+        pointBackgroundColor:'#16a34a',
+        fill:false,
+        tension:.35
+      },
+      {
+        label:'Jurídicas',
+        data:ultimos.map(d=>d.juridicas),
+        borderColor:'#7c3aed',
+        backgroundColor:'transparent',
+        borderWidth:1.5,
+        pointRadius:3,
+        pointBackgroundColor:'#7c3aed',
+        fill:false,
+        tension:.35
+      }
+    ]
+  },
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{
+        position:'top',
+        labels:{
+          boxWidth:12,boxHeight:12,padding:16,
+          font:{family:'Arial',size:11,weight:'700'}
+        }
+      },
+      tooltip:{
+        backgroundColor:'#fff',
+        titleColor:'#111827',
+        bodyColor:'#6b7280',
+        borderColor:'#dde1ea',
+        borderWidth:1,
+        padding:10,
+        titleFont:{family:'Arial',size:12,weight:'700'},
+        bodyFont:{family:'Arial',size:11},
+        callbacks:{
+          label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+        }
+      }
+    },
+    scales:{
+      x:{
+        grid:{color:'#f0f2f5'},
+        ticks:{font:{family:'Arial',size:11,weight:'700'},color:'#6b7280'}
+      },
+      y:{
+        grid:{color:'#f0f2f5'},
+        ticks:{
+          font:{family:'Arial',size:11},color:'#6b7280',
+          callback:v=>v.toLocaleString()
+        }
+      }
+    }
+  }
+});
+</script>
+</body>
+</html>
