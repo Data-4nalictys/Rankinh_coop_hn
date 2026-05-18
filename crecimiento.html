@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking Cooperativo HN — Crecimiento</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;
+  --accent:#1a6b4a;--accent-light:#eaf7f1;
+  --blue:#1d4ed8;--text:#111827;--text2:#6b7280;--muted:#9ca3af;
+  --sh:0 1px 3px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;overflow:hidden}
+.shell{display:grid;grid-template-columns:192px 1fr;grid-template-rows:56px 1fr;height:100vh}
+@media(max-width:700px){.shell{grid-template-columns:1fr}.sidebar{display:none}}
+
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);
+  box-shadow:var(--sh);flex-wrap:wrap;gap:6px}
+.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1a6b4a,#2d9e6b);
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
+.brand-txt{font-size:14px;font-weight:900;color:var(--text)}
+.brand-sub{font-size:10px;color:var(--muted)}
+
+.sidebar{background:var(--surface);border-right:1px solid var(--border);
+  padding:14px 0;display:flex;flex-direction:column;overflow:hidden}
+.nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.nav-sec:first-child{padding-top:0}
+.nav-a{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:700;
+  color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:.1s}
+.nav-a:hover{color:var(--text);background:var(--bg)}
+.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.nav-icon{width:15px;text-align:center;font-size:12px}
+.nav-sep{height:1px;background:var(--border);margin:8px 14px}
+.nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
+
+.main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+
+/* HEADER */
+.ph{padding:12px 20px 10px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;flex-wrap:wrap;gap:8px}
+.ph-title{font-size:20px;font-weight:900;color:var(--text)}
+.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.toggle-btn{padding:7px 14px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;border:none;background:transparent;transition:.12s}
+.toggle-btn.active{background:var(--accent);color:#fff}
+
+/* TABS */
+.tabs{display:flex;gap:0;padding:0 20px;flex-shrink:0;border-bottom:1px solid var(--border)}
+.tab{padding:9px 16px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;
+  border-bottom:2px solid transparent;transition:.12s;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* KPIS CAYCSOL */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 20px 10px;flex-shrink:0}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;box-shadow:var(--sh)}
+.kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
+.kpi-val{font-size:20px;font-weight:900;line-height:1}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.kpi-cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f0fbf5,#eaf7f1)}
+.kpi-cay .kpi-val{color:var(--accent)}
+.kpi-up .kpi-val{color:#16a34a}
+.kpi-rank .kpi-val{color:var(--blue)}
+
+/* CONTENT */
+.content{flex:1;overflow:hidden;display:none;flex-direction:column;padding:0 20px 14px;min-height:0}
+.content.active{display:flex}
+
+/* VIEW 1 & 2 — barras horizontales */
+.bar-wrap{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.bar-wrap::-webkit-scrollbar{width:4px}
+.bar-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+.bar-row{display:grid;grid-template-columns:180px 1fr 90px 70px;gap:8px;
+  align-items:center;padding:5px 0;border-bottom:1px solid var(--surface2)}
+.bar-row:last-child{border-bottom:none}
+.bar-name{font-size:11px;font-weight:700;color:var(--text);text-align:right;padding-right:8px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-name.cay{color:var(--accent)}
+.bar-track{height:22px;background:var(--surface2);border-radius:4px;overflow:hidden;
+  border:1px solid var(--border);position:relative}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;
+  padding-left:8px;font-size:10px;font-weight:700;color:#fff;
+  transition:width .5s cubic-bezier(.4,0,.2,1);min-width:0;white-space:nowrap;overflow:hidden}
+.bar-fill.cay{background:linear-gradient(90deg,#065f46,#16a34a)}
+.bar-fill.pos{background:linear-gradient(90deg,#1e40af,#3b82f6)}
+.bar-fill.neg{background:linear-gradient(90deg,#991b1b,#ef4444)}
+.bar-fill.gray{background:linear-gradient(90deg,#6b7280,#9ca3af)}
+.bar-abs{font-size:11px;font-weight:700;text-align:right;color:var(--text2)}
+.bar-pct{font-size:11px;font-weight:700;text-align:right}
+.pct-up{color:#16a34a}.pct-dn{color:#dc2626}
+
+/* VIEW 3 — tendencia líneas */
+.chart-wrap{flex:1;min-height:0;position:relative}
+.chart-hint{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 8px;flex-shrink:0}
+
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.bar-row{animation:fu .2s ease both}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo">HN</div>
+    <div>
+      <div class="brand-txt">Ranking Cooperativo Honduras</div>
+      <div class="brand-sub">Superintendencia de Cooperativas — CONSUCOOP</div>
+    </div>
+  </div>
+</header>
+
+<nav class="sidebar">
+  <div class="nav-sec">Rankings</div>
+  <a class="nav-a" href="afiliados.html"><span class="nav-icon">👥</span>Afiliados</a>
+  <a class="nav-a" href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
+  <a class="nav-a" href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
+  <a class="nav-a" href="pasivos.html"><span class="nav-icon">📊</span>Pasivos</a>
+  <div class="nav-sec">Resultados</div>
+  <a class="nav-a" href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
+  <a class="nav-a" href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
+  <a class="nav-a" href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">Análisis</div>
+  <a class="nav-a" href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
+  <a class="nav-a active" href="crecimiento.html"><span class="nav-icon">📊</span>Crecimiento</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">CAYCSOL</div>
+  <a class="nav-a" href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
+  <div class="nav-footer">Fuente: CONSUCOOP<br>Datos preliminares sujetos a revisión</div>
+</nav>
+
+<main class="main">
+  <div class="ph">
+    <div>
+      <div class="ph-title">📊 Análisis de Crecimiento</div>
+      <div class="ph-sub">Top 20 cooperativas — últimos 12 meses</div>
+    </div>
+    <div class="controls">
+      <div class="toggle">
+        <button class="toggle-btn active" id="btnBG" onclick="setMetrica('bg')">Activos Netos</button>
+        <button class="toggle-btn" id="btnAF" onclick="setMetrica('af')">Afiliados</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIS CAYCSOL -->
+  <div class="kpis">
+    <div class="kpi kpi-cay">
+      <div class="kpi-lbl">CAYCSOL — Último valor</div>
+      <div class="kpi-val" id="kLast">—</div>
+      <div class="kpi-sub" id="kLastSub">—</div>
+    </div>
+    <div class="kpi kpi-up">
+      <div class="kpi-lbl">Crecimiento absoluto</div>
+      <div class="kpi-val" id="kAbs">—</div>
+      <div class="kpi-sub">Últimos 12 meses</div>
+    </div>
+    <div class="kpi kpi-up">
+      <div class="kpi-lbl">Crecimiento %</div>
+      <div class="kpi-val" id="kPct">—</div>
+      <div class="kpi-sub">Variación acumulada</div>
+    </div>
+    <div class="kpi kpi-rank">
+      <div class="kpi-lbl">Posición en crecimiento %</div>
+      <div class="kpi-val" id="kRankPct">—</div>
+      <div class="kpi-sub">vs Top 20</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active" onclick="setTab('abs',this)">Crecimiento Absoluto</div>
+    <div class="tab" onclick="setTab('pct',this)">Crecimiento %</div>
+    <div class="tab" onclick="setTab('trend',this)">Tendencia 12 meses</div>
+  </div>
+
+  <!-- TAB 1: ABSOLUTO -->
+  <div class="content active" id="tabAbs">
+    <div style="display:grid;grid-template-columns:180px 1fr 90px 70px;gap:8px;padding:8px 0 4px;
+      font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">
+      <div style="text-align:right">Cooperativa</div>
+      <div>Crecimiento absoluto</div>
+      <div style="text-align:right">Valor</div>
+      <div style="text-align:right">%</div>
+    </div>
+    <div class="bar-wrap" id="rowsAbs"></div>
+  </div>
+
+  <!-- TAB 2: PORCENTAJE -->
+  <div class="content" id="tabPct">
+    <div style="display:grid;grid-template-columns:180px 1fr 90px 70px;gap:8px;padding:8px 0 4px;
+      font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">
+      <div style="text-align:right">Cooperativa</div>
+      <div>Crecimiento %</div>
+      <div style="text-align:right">Valor</div>
+      <div style="text-align:right">%</div>
+    </div>
+    <div class="bar-wrap" id="rowsPct"></div>
+  </div>
+
+  <!-- TAB 3: TENDENCIA -->
+  <div class="content" id="tabTrend">
+    <div class="chart-hint">Hover sobre una línea para resaltarla — CAYCSOL siempre en verde</div>
+    <div class="chart-wrap">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const MESES={1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May',6:'Jun',
+  7:'Jul',8:'Ago',9:'Sep',10:'Oct',11:'Nov',12:'Dic'};
+const DATA={"bg": {"series": {"ELGA": [8984646217, 9102137641, 9277781250, 9395778736, 9493462804, 9608514900, 9674589670, 9732355091, 9815190956, 10382299250, 10475775634, 10590312712], "OCOTEPEQUE": [6985022765, 7116863818, 7222310131, 7314787126, 7388074264, 7431950619, 7511291435, 7600950719, 7707324688, 7898007305, 8060453750, 8225912525], "SAGRADA FAMILIA": [6449264690, 6492390444, 6612299890, 6706733175, 6821848746, 6929046387, 7009565797, 7064085924, 7128881193, 7253510115, 7345488167, 7510506503], "CHOROTEGA": [6147705880, 6217383443, 6389482491, 6487848019, 6540509775, 6705029011, 6797486751, 6826887489, 6911561798, 7085324053, 7171425533, 7295201211], "EDUCADORES DE HONDURAS": [6239515260, 6387600386, 6448161235, 6505269788, 6562500096, 6629371170, 6803696047, 7024764405, 6883200233, 6978804355, 7095164141, 7159802674], "INTIBUCANA": [3294406684, 3349816240, 3450160038, 3515420672, 3543218360, 3621781545, 3655785922, 3716882886, 3760909536, 3939329136, 4095716170, 4207492115], "CACEENP": [3374832181, 3409265024, 3455329711, 3502311229, 3533701530, 3541313258, 3535287168, 3558408415, 3541405656, 3533847096, 3589109679, 3649985630], "FRATERNIDAD PESPIRENSE": [2322360647, 2338396145, 2378995448, 2411326164, 2442455464, 2461602266, 2485461716, 2494218950, 2510686760, 2541407109, 2551797723, 2567503330], "LA GUADALUPE": [2244939361, 2265160345, 2291529960, 2323365857, 2340316223, 2352102177, 2370843267, 2382291697, 2402462848, 2416692786, 2461502156, 2508056088], "CAYCSOL": [1375948455, 1428513237, 1494939687, 1560811806, 1604551576, 1663835980, 1720067645, 1765266526, 1804028646, 1883098869, 1983635272, 2070134752], "FRONTERIZA INTIBUCANA": [1693499852, 1739712144, 1788772370, 1831246421, 1863585227, 1911401773, 1951681534, 1984608220, 2004035680, 2020503923, 2042227570, 2063788412], "TAULABE": [1815555462, 1834281148, 1845585898, 1855339154, 1866622832, 1894456732, 1890597467, 1909203198, 1931901685, 1938303554, 1950789659, 1996860579], "RIO GRANDE": [1609703575, 1623269987, 1659426191, 1688110595, 1707942812, 1723878895, 1759820557, 1786896266, 1825019404, 1864541354, 1929219135, 1983241123], "APAGUIZ": [1361849764, 1371968793, 1401929508, 1411145953, 1428353835, 1457876174, 1471801159, 1485746868, 1524318796, 1575940090, 1607434044, 1627256521], "SAN MARQUEÑA": [1417567863, 1438834830, 1454895717, 1470185397, 1483045828, 1490985046, 1504432794, 1516431647, 1529872367, 1545274466, 1556986167, 1568180631], "CEIBEÑA": [1357605627, 1389145086, 1420135222, 1444513033, 1470750667, 1493168302, 1504567436, 1506014236, 1499165255, 1515680287, 1518338644, 1528190056], "NUEVA VIDA": [1310134889, 1325570701, 1349526461, 1363756616, 1376178081, 1387423121, 1390385843, 1400994363, 1426528398, 1451675944, 1467788177, 1505185055], "JUTICALPA": [1162095661, 1185064365, 1211909097, 1242124440, 1272112339, 1286302801, 1300533474, 1317635687, 1324356841, 1369892497, 1385882232, 1429142330], "EMPLEADOS DEL IHSS": [1061855117, 1070519892, 1071750304, 1088443200, 1104650401, 1115546009, 1128516388, 1129703950, 1111289105, 1129395641, 1135978049, 1140904792], "MIXTA LEMPIRA SUR": [912039897, 932318574, 954961009, 974952736, 990898505, 1000512875, 1022229846, 1025240337, 1049592281, 1065005291, 1079081571, 1090669717]}, "periodos": ["2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"], "top20": ["ELGA", "OCOTEPEQUE", "SAGRADA FAMILIA", "CHOROTEGA", "EDUCADORES DE HONDURAS", "INTIBUCANA", "CACEENP", "FRATERNIDAD PESPIRENSE", "LA GUADALUPE", "CAYCSOL", "FRONTERIZA INTIBUCANA", "TAULABE", "RIO GRANDE", "APAGUIZ", "SAN MARQUEÑA", "CEIBEÑA", "NUEVA VIDA", "JUTICALPA", "EMPLEADOS DEL IHSS", "MIXTA LEMPIRA SUR"], "growth": {"ELGA": {"abs": 1605666495, "pct": 17.9, "last": 10590312712}, "OCOTEPEQUE": {"abs": 1240889760, "pct": 17.8, "last": 8225912525}, "SAGRADA FAMILIA": {"abs": 1061241813, "pct": 16.5, "last": 7510506503}, "CHOROTEGA": {"abs": 1147495331, "pct": 18.7, "last": 7295201211}, "EDUCADORES DE HONDURAS": {"abs": 920287414, "pct": 14.7, "last": 7159802674}, "INTIBUCANA": {"abs": 913085431, "pct": 27.7, "last": 4207492115}, "CACEENP": {"abs": 275153449, "pct": 8.2, "last": 3649985630}, "FRATERNIDAD PESPIRENSE": {"abs": 245142683, "pct": 10.6, "last": 2567503330}, "LA GUADALUPE": {"abs": 263116727, "pct": 11.7, "last": 2508056088}, "CAYCSOL": {"abs": 694186297, "pct": 50.5, "last": 2070134752}, "FRONTERIZA INTIBUCANA": {"abs": 370288560, "pct": 21.9, "last": 2063788412}, "TAULABE": {"abs": 181305117, "pct": 10.0, "last": 1996860579}, "RIO GRANDE": {"abs": 373537548, "pct": 23.2, "last": 1983241123}, "APAGUIZ": {"abs": 265406757, "pct": 19.5, "last": 1627256521}, "SAN MARQUEÑA": {"abs": 150612768, "pct": 10.6, "last": 1568180631}, "CEIBEÑA": {"abs": 170584429, "pct": 12.6, "last": 1528190056}, "NUEVA VIDA": {"abs": 195050166, "pct": 14.9, "last": 1505185055}, "JUTICALPA": {"abs": 267046669, "pct": 23.0, "last": 1429142330}, "EMPLEADOS DEL IHSS": {"abs": 79049675, "pct": 7.4, "last": 1140904792}, "MIXTA LEMPIRA SUR": {"abs": 178629820, "pct": 19.6, "last": 1090669717}}}, "af": {"series": {"SAGRADA FAMILIA": [314529, 315453, 316753, 317897, 318664, 319643, 319745, 320189, 316910, 312249, 313403, 317517], "ELGA": [252156, 252156, 254355, 255580, 256535, 257254, 257858, 258351, 259012, 260397, 261394, 262307], "CHOROTEGA": [166030, 166823, 167633, 168563, 169257, 169992, 170537, 170947, 171456, 172154, 172847, 173754], "OCOTEPEQUE": [97195, 97333, 97490, 97840, 98051, 98199, 98247, 98583, 98958, 100050, 100741, 101344], "INTIBUCANA": [74268, 74521, 74775, 75022, 75315, 75554, 75794, 75912, 76151, 76560, 76559, 77512], "EDUCADORES DE HONDURAS": [48632, 49035, 49449, 49779, 50322, 50646, 50935, 51165, 51281, 51527, 51887, 52287], "LA GUADALUPE": [46404, 46576, 46748, 46899, 47079, 46890, 46981, 46985, 46859, 47015, 47187, 47378], "CACEENP": [47652, 87999, null, 45049, 45441, 45546, 44734, 44736, 44069, 44533, 44684, 44830], "APAGUIZ": [40194, 81127, null, 40780, 40904, 41050, 41185, 41185, 41382, 41630, 41846, 42068], "FRATERNIDAD PESPIRENSE": [42606, 42606, 42844, 43014, 43135, 41713, 41811, 41887, 41579, 41795, 41920, 42042], "SAN MARQUEÑA": [38694, 38744, 38906, 39081, 39163, 39287, 39331, 39347, 39433, 39529, 39591, 39692], "CAYCSOL": [27926, 28931, 29912, 30949, 32213, 33053, 33852, 34567, 35313, 35999, 36893, 37799], "JUTICALPA": [34147, 34316, 34495, 34693, 34837, 35047, 35266, 35455, 35437, 35652, 35787, 35972], "CEIBEÑA": [29537, 29747, 30071, 30401, 30701, 31044, 31311, 30323, 30521, 30858, 31186, 31418], "RIO GRANDE": [27770, 27759, 27766, 27890, 28121, 28246, 28336, 28504, 28638, 28878, 29057, 29206], "TAULABE": [24256, 24361, 24426, 24524, 24580, 24673, 24754, 24802, 24545, 24641, 24707, 24776], "NUEVA VIDA": [19589, 19767, 19931, 20135, 20359, 20575, 20747, 20887, 21046, 21357, 21671, 21956], "FRONTERIZA INTIBUCANA": [21852, 21337, 21404, 21415, 21467, 21509, 21565, 21612, 21684, 21738, 21793, 21852], "PINALEJO": [18971, 18984, 17723, 17117, 17084, 18859, 18861, 18875, 17041, 17056, 17053, 17039], "YORO": [15196, 15296, 15384, 15127, 15172, 15240, 15324, 15284, 15476, 15620, 15710, 15842]}, "periodos": ["2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"], "top20": ["SAGRADA FAMILIA", "ELGA", "CHOROTEGA", "OCOTEPEQUE", "INTIBUCANA", "EDUCADORES DE HONDURAS", "LA GUADALUPE", "CACEENP", "APAGUIZ", "FRATERNIDAD PESPIRENSE", "SAN MARQUEÑA", "CAYCSOL", "JUTICALPA", "CEIBEÑA", "RIO GRANDE", "TAULABE", "NUEVA VIDA", "FRONTERIZA INTIBUCANA", "PINALEJO", "YORO"], "growth": {"SAGRADA FAMILIA": {"abs": 2988, "pct": 0.9, "last": 317517}, "ELGA": {"abs": 10151, "pct": 4.0, "last": 262307}, "CHOROTEGA": {"abs": 7724, "pct": 4.7, "last": 173754}, "OCOTEPEQUE": {"abs": 4149, "pct": 4.3, "last": 101344}, "INTIBUCANA": {"abs": 3244, "pct": 4.4, "last": 77512}, "EDUCADORES DE HONDURAS": {"abs": 3655, "pct": 7.5, "last": 52287}, "LA GUADALUPE": {"abs": 974, "pct": 2.1, "last": 47378}, "CACEENP": {"abs": -2822, "pct": -5.9, "last": 44830}, "APAGUIZ": {"abs": 1874, "pct": 4.7, "last": 42068}, "FRATERNIDAD PESPIRENSE": {"abs": -564, "pct": -1.3, "last": 42042}, "SAN MARQUEÑA": {"abs": 998, "pct": 2.6, "last": 39692}, "CAYCSOL": {"abs": 9873, "pct": 35.4, "last": 37799}, "JUTICALPA": {"abs": 1825, "pct": 5.3, "last": 35972}, "CEIBEÑA": {"abs": 1881, "pct": 6.4, "last": 31418}, "RIO GRANDE": {"abs": 1436, "pct": 5.2, "last": 29206}, "TAULABE": {"abs": 520, "pct": 2.1, "last": 24776}, "NUEVA VIDA": {"abs": 2367, "pct": 12.1, "last": 21956}, "FRONTERIZA INTIBUCANA": {"abs": 0, "pct": 0.0, "last": 21852}, "PINALEJO": {"abs": -1932, "pct": -10.2, "last": 17039}, "YORO": {"abs": 646, "pct": 4.3, "last": 15842}}}};
+
+let metrica='bg';
+let activeTab='abs';
+let trendChart=null;
+
+function fmtP(p){const[y,m]=p.split('-');return MESES[parseInt(m)]+'-'+y.slice(2);}
+function fmtM(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
+function fmtVal(n){return metrica==='bg'?fmtM(n):n.toLocaleString();}
+function fmtAbs(n){return metrica==='bg'?fmtM(n):'+'+n.toLocaleString();}
+
+function setMetrica(m){
+  metrica=m;
+  document.getElementById('btnBG').classList.toggle('active',m==='bg');
+  document.getElementById('btnAF').classList.toggle('active',m==='af');
+  render();
+}
+
+function setTab(tab, el){
+  activeTab=tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+  if(tab==='trend') renderTrend();
+}
+
+function render(){
+  const d=DATA[metrica];
+  const growth=d.growth;
+  const top20=d.top20;
+
+  // KPIs CAYCSOL
+  const cay=growth['CAYCSOL'];
+  if(cay){
+    document.getElementById('kLast').textContent=fmtVal(cay.last);
+    document.getElementById('kLastSub').textContent='Al '+fmtP(d.periodos[d.periodos.length-1]);
+    document.getElementById('kAbs').textContent=(metrica==='bg'?fmtM(cay.abs):'+'+cay.abs.toLocaleString());
+    document.getElementById('kPct').textContent='+'+cay.pct+'%';
+    // Ranking por %
+    const sorted=Object.entries(growth).sort((a,b)=>b[1].pct-a[1].pct);
+    const rankPct=sorted.findIndex(([k])=>k==='CAYCSOL')+1;
+    document.getElementById('kRankPct').textContent='#'+rankPct+' de '+sorted.length;
+  }
+
+  // TAB ABS — ordenado por crecimiento absoluto
+  const sortedAbs=top20.map(c=>({coop:c,...(growth[c]||{abs:0,pct:0,last:0})}))
+    .sort((a,b)=>b.abs-a.abs);
+  const maxAbs=Math.max(...sortedAbs.map(d=>Math.abs(d.abs)),1);
+  let html='';
+  sortedAbs.forEach((d,i)=>{
+    const isCay=d.coop==='CAYCSOL';
+    const pct=Math.max(Math.abs(d.abs)/maxAbs*100,1);
+    const bCls=isCay?'cay':d.abs>=0?'pos':'neg';
+    const pctCls=d.pct>=0?'pct-up':'pct-dn';
+    const inside=pct>35;
+    html+=`<div class="bar-row" style="animation-delay:${i*.02}s">
+      <div class="bar-name${isCay?' cay':''}">${d.coop}</div>
+      <div class="bar-track">
+        <div class="bar-fill ${bCls}" style="width:${pct}%">${inside?fmtAbs(d.abs):''}</div>
+        ${!inside?`<span style="position:absolute;left:${pct}%;top:50%;transform:translateY(-50%);
+          padding-left:6px;font-size:10px;font-weight:700;color:var(--text2)">${fmtAbs(d.abs)}</span>`:''}
+      </div>
+      <div class="bar-abs">${fmtVal(d.last)}</div>
+      <div class="bar-pct ${pctCls}">${d.pct>=0?'+':''}${d.pct}%</div>
+    </div>`;
+  });
+  document.getElementById('rowsAbs').innerHTML=html;
+
+  // TAB PCT — ordenado por %
+  const sortedPct=top20.map(c=>({coop:c,...(growth[c]||{abs:0,pct:0,last:0})}))
+    .sort((a,b)=>b.pct-a.pct);
+  const maxPct=Math.max(...sortedPct.map(d=>Math.abs(d.pct)),1);
+  let html2='';
+  sortedPct.forEach((d,i)=>{
+    const isCay=d.coop==='CAYCSOL';
+    const pw=Math.max(Math.abs(d.pct)/maxPct*100,1);
+    const bCls=isCay?'cay':d.pct>=0?'pos':'neg';
+    const pctCls=d.pct>=0?'pct-up':'pct-dn';
+    const inside=pw>35;
+    const label=(d.pct>=0?'+':'')+d.pct+'%';
+    html2+=`<div class="bar-row" style="animation-delay:${i*.02}s">
+      <div class="bar-name${isCay?' cay':''}">${d.coop}</div>
+      <div class="bar-track">
+        <div class="bar-fill ${bCls}" style="width:${pw}%">${inside?label:''}</div>
+        ${!inside?`<span style="position:absolute;left:${pw}%;top:50%;transform:translateY(-50%);
+          padding-left:6px;font-size:10px;font-weight:700;color:var(--text2)">${label}</span>`:''}
+      </div>
+      <div class="bar-abs">${fmtVal(d.last)}</div>
+      <div class="bar-pct ${pctCls}">${label}</div>
+    </div>`;
+  });
+  document.getElementById('rowsPct').innerHTML=html2;
+
+  // Si está en tendencia, refrescar
+  if(activeTab==='trend') renderTrend();
+}
+
+function renderTrend(){
+  const d=DATA[metrica];
+  const labels=d.periodos.map(fmtP);
+  const top20=d.top20;
+
+  if(trendChart) trendChart.destroy();
+
+  const datasets=top20.map(coop=>{
+    const isCay=coop==='CAYCSOL';
+    return {
+      label:coop,
+      data:d.series[coop],
+      borderColor:isCay?'#16a34a':'#cbd5e1',
+      backgroundColor:'transparent',
+      borderWidth:isCay?3:1.5,
+      pointRadius:isCay?4:0,
+      pointHoverRadius:5,
+      pointBackgroundColor:isCay?'#16a34a':'#64748b',
+      tension:.35,
+      spanGaps:true,
+      order:isCay?0:1,
+      // guardamos isCay para los hover handlers
+      caycsol:isCay
+    };
+  });
+
+  const ctx=document.getElementById('trendChart').getContext('2d');
+  trendChart=new Chart(ctx,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      interaction:{mode:'nearest',intersect:false,axis:'x'},
+      onHover:(evt,elements)=>{
+        if(!elements.length){
+          // Restaurar todo
+          trendChart.data.datasets.forEach(ds=>{
+            ds.borderColor=ds.caycsol?'#16a34a':'#cbd5e1';
+            ds.borderWidth=ds.caycsol?3:1.5;
+            ds.pointRadius=ds.caycsol?4:0;
+          });
+        } else {
+          const idx=elements[0].datasetIndex;
+          trendChart.data.datasets.forEach((ds,i)=>{
+            if(ds.caycsol){
+              ds.borderColor='#16a34a';
+              ds.borderWidth=3;
+              ds.pointRadius=4;
+            } else if(i===idx){
+              ds.borderColor='#1d4ed8';
+              ds.borderWidth=2.5;
+              ds.pointRadius=4;
+            } else {
+              ds.borderColor='#e2e8f0';
+              ds.borderWidth=1;
+              ds.pointRadius=0;
+            }
+          });
+        }
+        trendChart.update('none');
+      },
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#fff',
+          titleColor:'#111827',
+          bodyColor:'#6b7280',
+          borderColor:'#dde1ea',
+          borderWidth:1,
+          padding:10,
+          filter:item=>{
+            // Solo mostrar CAYCSOL y la línea hover
+            return item.dataset.caycsol || item.datasetIndex===item.chart._hoveredDatasetIndex;
+          },
+          callbacks:{
+            label:ctx=>{
+              const v=ctx.parsed.y;
+              if(v===null) return null;
+              return ` ${ctx.dataset.label}: ${metrica==='bg'?fmtM(v):v.toLocaleString()}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{
+          grid:{color:'#f5f6f8'},
+          ticks:{font:{family:'Arial',size:10,weight:'700'},color:'#9ca3af',maxRotation:45}
+        },
+        y:{
+          grid:{color:'#f5f6f8'},
+          ticks:{
+            font:{family:'Arial',size:10},color:'#9ca3af',
+            callback:v=>metrica==='bg'?fmtM(v):v.toLocaleString()
+          }
+        }
+      }
+    }
+  });
+
+  // Guardar index hover para tooltip
+  trendChart._hoveredDatasetIndex=-1;
+  document.getElementById('trendChart').addEventListener('mousemove',evt=>{
+    const pts=trendChart.getElementsAtEventForMode(evt,'nearest',{intersect:false},false);
+    trendChart._hoveredDatasetIndex=pts.length?pts[0].datasetIndex:-1;
+  });
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
