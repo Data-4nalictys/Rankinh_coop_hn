@@ -122,15 +122,47 @@ input[type=range]{ flex:1; accent-color:#16a34a; cursor:pointer; }
   font-size:10px; font-weight:800; color:#374151;
 }
 
-@media(max-width:900px){
-  .chart{ width:100%; }
-  .side{ right:16px; bottom:110px; }
-  .year-big{ font-size:80px; }
-  .month-big{ font-size:20px; }
-  .total-sistema{ font-size:16px; }
-  .bar-row{ grid-template-columns:130px 1fr 70px; }
+@media(max-width:700px){
+  body{ overflow-y:auto; }
+  .page{
+    padding:10px 10px 64px;
+    display:flex; flex-direction:column;
+    height:auto; min-height:100vh;
+  }
+  .header{ margin-bottom:4px; }
+  .title{ font-size:22px; }
+  .subtitle{ font-size:10px; }
+  /* Año/mes inline arriba del chart */
+  .side{
+    position:relative !important;
+    right:auto !important; bottom:auto !important;
+    text-align:center; margin:4px 0 8px;
+    display:flex; align-items:center;
+    justify-content:center; gap:12px; flex-wrap:wrap;
+  }
+  .year-big{ font-size:52px; line-height:1; }
+  .month-big{ font-size:16px; }
+  .total-sistema{ font-size:14px; margin-top:0; }
+  /* Chart full width */
+  .chart{ width:100% !important; position:relative; }
+  /* Filas compactas */
+  .bar-row{ grid-template-columns:95px 1fr 72px; height:32px; }
   .name{ font-size:9px; }
-  .value{ font-size:10px; }
+  .value{ font-size:9px; }
+  .bar{ min-width:28px; padding-left:5px; }
+  .rank-inside{ font-size:10px; }
+  .logo-float{ width:26px; height:26px; right:-13px; }
+  .track{ height:24px; }
+  /* Controles fijos al fondo */
+  .controls{
+    position:fixed; left:0; right:0; bottom:0;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(6px);
+    padding:8px 14px;
+    border-top:1px solid #dde1ea;
+    gap:10px; z-index:10;
+  }
+  .footer{ position:fixed; right:10px; bottom:56px; font-size:9px; }
 }
 </style>
 </head>
