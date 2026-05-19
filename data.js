@@ -5,6 +5,11 @@
 
 const BASE = 'https://raw.githubusercontent.com/Data-4nalictys/Rankinh_coop_hn/main/data/';
 
+const _cache = {};
+
+// ── Parser CSV robusto (maneja comas dentro de comillas) ──
+function parseCSV(text) {
+
 // ── Parser CSV robusto (maneja comas dentro de comillas) ──
 function parseCSV(text) {
   text = text.replace(/^\uFEFF/, '');
