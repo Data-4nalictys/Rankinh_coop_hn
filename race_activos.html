@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Top Cooperativas Honduras — Bar Race</title>
+<script src="data.js"></script>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#eaf8fb;
+  color:#111827;
+  overflow:hidden;
+}
+.page{
+  width:100vw;
+  height:100vh;
+  padding:28px 40px;
+  position:relative;
+}
+h1{
+  text-align:center;
+  margin:0 0 25px;
+  font-size:30px;
+  text-shadow:2px 2px #fff;
+}
+.chart{
+  width:72%;
+  height:72vh;
+}
+.row{
+  display:grid;
+  grid-template-columns:190px 1fr 120px;
+  align-items:center;
+  gap:10px;
+  height:34px;
+  margin:5px 0;
+}
+.name{
+  text-align:right;
+  font-weight:700;
+  font-size:15px;
+}
+.bar-wrap{
+  height:27px;
+  background:rgba(255,255,255,.65);
+  border-radius:3px;
+  position:relative;
+}
+.bar{
+  height:100%;
+  border-radius:3px;
+  transition:width .75s ease;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:8px;
+  color:#111827;
+  font-size:13px;
+  font-weight:800;
+}
+.value{
+  font-size:14px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.rank{
+  color:#0f766e;
+  font-weight:900;
+  margin-right:6px;
+}
+.yearBox{
+  position:absolute;
+  right:70px;
+  bottom:90px;
+  text-align:right;
+}
+.year{
+  font-size:120px;
+  font-weight:900;
+  color:#1d4ed8;
+  line-height:.8;
+}
+.total{
+  font-size:26px;
+  color:#00a651;
+  font-weight:700;
+}
+.controls{
+  position:absolute;
+  left:35px;
+  bottom:30px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+button{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:none;
+  background:#111827;
+  color:white;
+  font-size:18px;
+  cursor:pointer;
+}
+input[type=range]{
+  width:760px;
+}
+.periodLabel{
+  font-size:13px;
+  font-weight:700;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <h1>Top Cooperativas de Honduras</h1>
+
+  <div class="chart" id="chart"></div>
+
+  <div class="yearBox">
+    <div class="year" id="yearBig">----</div>
+    <div class="total" id="totalSistema">Activos Netos: —</div>
+  </div>
+
+  <div class="controls">
+    <button id="btnPlay">▶</button>
+    <input type="range" id="slider" min="0" value="0">
+    <div class="periodLabel" id="periodLabel">—</div>
+  </div>
+</div>
+
+<script>
+const TOP_N = 15;
+const CAMPO = 'activos_net';
+
+const colores = [
+  '#ff9b7b','#d9b7cc','#9ca3af','#cfd8dc','#dbeafe',
+  '#fde68a','#fecaca','#cbd5e1','#bae6fd','#ddd6fe',
+  '#bfdbfe','#fbcfe8','#bbf7d0','#c7d2fe','#e5e7eb'
+];
+
+let DATA = [];
+let PERIODOS = [];
+let IDX = {};
+let pos = 0;
+let timer = null;
+let playing = false;
+
+const chart = document.getElementById('chart');
+const slider = document.getElementById('slider');
+const btnPlay = document.getElementById('btnPlay');
+
+function fmtMill(n){
+  return Math.round(n / 1e6).toLocaleString() + ' Mill';
+}
+
+function render(){
+  const periodo = PERIODOS[pos];
+  const rows = IDX[periodo] ? Object.values(IDX[periodo]) : [];
+
+  const sorted = [...rows]
+    .sort((a,b)=>b[CAMPO]-a[CAMPO])
+    .slice(0,TOP_N);
+
+  const max = sorted.length ? sorted[0][CAMPO] : 1;
+  const totalSistema = rows.reduce((s,d)=>s+(d[CAMPO]||0),0);
+
+  const [anio, mes] = periodo.split('-');
+
+  document.getElementById('yearBig').textContent = anio;
+  document.getElementById('periodLabel').textContent = periodo;
+  document.getElementById('totalSistema').textContent =
+    'Activos Netos: ' + fmtMill(totalSistema);
+
+  chart.innerHTML = '';
+
+  sorted.forEach((d,i)=>{
+    const pct = Math.max((d[CAMPO] / max) * 100, 2);
+
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    row.innerHTML = `
+      <div class="name">
+        <span class="rank">#${i+1}</span>${d.coop}
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar" style="width:${pct}%;background:${colores[i % colores.length]}">
+          ${fmtMill(d[CAMPO])}
+        </div>
+      </div>
+
+      <div class="value">${fmtMill(d[CAMPO])}</div>
+    `;
+
+    chart.appendChild(row);
+  });
+
+  slider.value = pos;
+}
+
+function play(){
+  if(playing){
+    clearInterval(timer);
+    playing = false;
+    btnPlay.textContent = '▶';
+    return;
+  }
+
+  playing = true;
+  btnPlay.textContent = '⏸';
+
+  timer = setInterval(()=>{
+    pos++;
+    if(pos >= PERIODOS.length) pos = 0;
+    render();
+  }, 1300);
+}
+
+RD.loadBalanceGeneral().then(raw=>{
+  DATA = RD.agrupar(raw, [
+    'activos_net',
+    'activos_tot',
+    'prestamos',
+    'pasivos',
+    'obligaciones',
+    'patrimonio'
+  ]);
+
+  PERIODOS = RD.periodos(DATA);
+  IDX = RD.buildIndex(DATA);
+
+  slider.max = PERIODOS.length - 1;
+  pos = 0;
+
+  slider.addEventListener('input', e=>{
+    pos = Number(e.target.value);
+    render();
+  });
+
+  btnPlay.addEventListener('click', play);
+
+  render();
+}).catch(err=>{
+  chart.innerHTML = `<h2>Error cargando datos: ${err.message}</h2>`;
+});
+</script>
+
+</body>
+</html>
