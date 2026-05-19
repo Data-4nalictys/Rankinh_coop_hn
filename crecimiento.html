@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ranking Cooperativo HN — Crecimiento</title>
+<script src="data.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <style>
@@ -129,12 +130,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <a class="nav-a" href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
-  <a class="nav-a" href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
+  <a class="nav-a " href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
   <a class="nav-a active" href="crecimiento.html"><span class="nav-icon">📊</span>Crecimiento</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">CAYCSOL</div>
-  <a class="nav-a" href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
-  <div class="nav-footer">Fuente: CONSUCOOP</div>
+  <a class="nav-a " href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
+  <div class="nav-footer">Fuente: CONSUCOOP<br>Datos preliminares sujetos a revisión</div>
 </nav>
 
 <main class="main">
@@ -219,7 +220,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 <script>
 const MESES={1:'Ene',2:'Feb',3:'Mar',4:'Abr',5:'May',6:'Jun',
   7:'Jul',8:'Ago',9:'Sep',10:'Oct',11:'Nov',12:'Dic'};
-const DATA={"bg": {"series": {"ELGA": [8984646217, 9102137641, 9277781250, 9395778736, 9493462804, 9608514900, 9674589670, 9732355091, 9815190956, 10382299250, 10475775634, 10590312712], "OCOTEPEQUE": [6985022765, 7116863818, 7222310131, 7314787126, 7388074264, 7431950619, 7511291435, 7600950719, 7707324688, 7898007305, 8060453750, 8225912525], "SAGRADA FAMILIA": [6449264690, 6492390444, 6612299890, 6706733175, 6821848746, 6929046387, 7009565797, 7064085924, 7128881193, 7253510115, 7345488167, 7510506503], "CHOROTEGA": [6147705880, 6217383443, 6389482491, 6487848019, 6540509775, 6705029011, 6797486751, 6826887489, 6911561798, 7085324053, 7171425533, 7295201211], "EDUCADORES DE HONDURAS": [6239515260, 6387600386, 6448161235, 6505269788, 6562500096, 6629371170, 6803696047, 7024764405, 6883200233, 6978804355, 7095164141, 7159802674], "INTIBUCANA": [3294406684, 3349816240, 3450160038, 3515420672, 3543218360, 3621781545, 3655785922, 3716882886, 3760909536, 3939329136, 4095716170, 4207492115], "CACEENP": [3374832181, 3409265024, 3455329711, 3502311229, 3533701530, 3541313258, 3535287168, 3558408415, 3541405656, 3533847096, 3589109679, 3649985630], "FRATERNIDAD PESPIRENSE": [2322360647, 2338396145, 2378995448, 2411326164, 2442455464, 2461602266, 2485461716, 2494218950, 2510686760, 2541407109, 2551797723, 2567503330], "LA GUADALUPE": [2244939361, 2265160345, 2291529960, 2323365857, 2340316223, 2352102177, 2370843267, 2382291697, 2402462848, 2416692786, 2461502156, 2508056088], "CAYCSOL": [1375948455, 1428513237, 1494939687, 1560811806, 1604551576, 1663835980, 1720067645, 1765266526, 1804028646, 1883098869, 1983635272, 2070134752], "FRONTERIZA INTIBUCANA": [1693499852, 1739712144, 1788772370, 1831246421, 1863585227, 1911401773, 1951681534, 1984608220, 2004035680, 2020503923, 2042227570, 2063788412], "TAULABE": [1815555462, 1834281148, 1845585898, 1855339154, 1866622832, 1894456732, 1890597467, 1909203198, 1931901685, 1938303554, 1950789659, 1996860579], "RIO GRANDE": [1609703575, 1623269987, 1659426191, 1688110595, 1707942812, 1723878895, 1759820557, 1786896266, 1825019404, 1864541354, 1929219135, 1983241123], "APAGUIZ": [1361849764, 1371968793, 1401929508, 1411145953, 1428353835, 1457876174, 1471801159, 1485746868, 1524318796, 1575940090, 1607434044, 1627256521], "SAN MARQUEÑA": [1417567863, 1438834830, 1454895717, 1470185397, 1483045828, 1490985046, 1504432794, 1516431647, 1529872367, 1545274466, 1556986167, 1568180631], "CEIBEÑA": [1357605627, 1389145086, 1420135222, 1444513033, 1470750667, 1493168302, 1504567436, 1506014236, 1499165255, 1515680287, 1518338644, 1528190056], "NUEVA VIDA": [1310134889, 1325570701, 1349526461, 1363756616, 1376178081, 1387423121, 1390385843, 1400994363, 1426528398, 1451675944, 1467788177, 1505185055], "JUTICALPA": [1162095661, 1185064365, 1211909097, 1242124440, 1272112339, 1286302801, 1300533474, 1317635687, 1324356841, 1369892497, 1385882232, 1429142330], "EMPLEADOS DEL IHSS": [1061855117, 1070519892, 1071750304, 1088443200, 1104650401, 1115546009, 1128516388, 1129703950, 1111289105, 1129395641, 1135978049, 1140904792], "MIXTA LEMPIRA SUR": [912039897, 932318574, 954961009, 974952736, 990898505, 1000512875, 1022229846, 1025240337, 1049592281, 1065005291, 1079081571, 1090669717]}, "periodos": ["2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"], "top20": ["ELGA", "OCOTEPEQUE", "SAGRADA FAMILIA", "CHOROTEGA", "EDUCADORES DE HONDURAS", "INTIBUCANA", "CACEENP", "FRATERNIDAD PESPIRENSE", "LA GUADALUPE", "CAYCSOL", "FRONTERIZA INTIBUCANA", "TAULABE", "RIO GRANDE", "APAGUIZ", "SAN MARQUEÑA", "CEIBEÑA", "NUEVA VIDA", "JUTICALPA", "EMPLEADOS DEL IHSS", "MIXTA LEMPIRA SUR"], "growth": {"ELGA": {"abs": 1605666495, "pct": 17.9, "last": 10590312712}, "OCOTEPEQUE": {"abs": 1240889760, "pct": 17.8, "last": 8225912525}, "SAGRADA FAMILIA": {"abs": 1061241813, "pct": 16.5, "last": 7510506503}, "CHOROTEGA": {"abs": 1147495331, "pct": 18.7, "last": 7295201211}, "EDUCADORES DE HONDURAS": {"abs": 920287414, "pct": 14.7, "last": 7159802674}, "INTIBUCANA": {"abs": 913085431, "pct": 27.7, "last": 4207492115}, "CACEENP": {"abs": 275153449, "pct": 8.2, "last": 3649985630}, "FRATERNIDAD PESPIRENSE": {"abs": 245142683, "pct": 10.6, "last": 2567503330}, "LA GUADALUPE": {"abs": 263116727, "pct": 11.7, "last": 2508056088}, "CAYCSOL": {"abs": 694186297, "pct": 50.5, "last": 2070134752}, "FRONTERIZA INTIBUCANA": {"abs": 370288560, "pct": 21.9, "last": 2063788412}, "TAULABE": {"abs": 181305117, "pct": 10.0, "last": 1996860579}, "RIO GRANDE": {"abs": 373537548, "pct": 23.2, "last": 1983241123}, "APAGUIZ": {"abs": 265406757, "pct": 19.5, "last": 1627256521}, "SAN MARQUEÑA": {"abs": 150612768, "pct": 10.6, "last": 1568180631}, "CEIBEÑA": {"abs": 170584429, "pct": 12.6, "last": 1528190056}, "NUEVA VIDA": {"abs": 195050166, "pct": 14.9, "last": 1505185055}, "JUTICALPA": {"abs": 267046669, "pct": 23.0, "last": 1429142330}, "EMPLEADOS DEL IHSS": {"abs": 79049675, "pct": 7.4, "last": 1140904792}, "MIXTA LEMPIRA SUR": {"abs": 178629820, "pct": 19.6, "last": 1090669717}}}, "af": {"series": {"SAGRADA FAMILIA": [314529, 315453, 316753, 317897, 318664, 319643, 319745, 320189, 316910, 312249, 313403, 317517], "ELGA": [252156, 252156, 254355, 255580, 256535, 257254, 257858, 258351, 259012, 260397, 261394, 262307], "CHOROTEGA": [166030, 166823, 167633, 168563, 169257, 169992, 170537, 170947, 171456, 172154, 172847, 173754], "OCOTEPEQUE": [97195, 97333, 97490, 97840, 98051, 98199, 98247, 98583, 98958, 100050, 100741, 101344], "INTIBUCANA": [74268, 74521, 74775, 75022, 75315, 75554, 75794, 75912, 76151, 76560, 76559, 77512], "EDUCADORES DE HONDURAS": [48632, 49035, 49449, 49779, 50322, 50646, 50935, 51165, 51281, 51527, 51887, 52287], "LA GUADALUPE": [46404, 46576, 46748, 46899, 47079, 46890, 46981, 46985, 46859, 47015, 47187, 47378], "CACEENP": [47652, 87999, null, 45049, 45441, 45546, 44734, 44736, 44069, 44533, 44684, 44830], "APAGUIZ": [40194, 81127, null, 40780, 40904, 41050, 41185, 41185, 41382, 41630, 41846, 42068], "FRATERNIDAD PESPIRENSE": [42606, 42606, 42844, 43014, 43135, 41713, 41811, 41887, 41579, 41795, 41920, 42042], "SAN MARQUEÑA": [38694, 38744, 38906, 39081, 39163, 39287, 39331, 39347, 39433, 39529, 39591, 39692], "CAYCSOL": [27926, 28931, 29912, 30949, 32213, 33053, 33852, 34567, 35313, 35999, 36893, 37799], "JUTICALPA": [34147, 34316, 34495, 34693, 34837, 35047, 35266, 35455, 35437, 35652, 35787, 35972], "CEIBEÑA": [29537, 29747, 30071, 30401, 30701, 31044, 31311, 30323, 30521, 30858, 31186, 31418], "RIO GRANDE": [27770, 27759, 27766, 27890, 28121, 28246, 28336, 28504, 28638, 28878, 29057, 29206], "TAULABE": [24256, 24361, 24426, 24524, 24580, 24673, 24754, 24802, 24545, 24641, 24707, 24776], "NUEVA VIDA": [19589, 19767, 19931, 20135, 20359, 20575, 20747, 20887, 21046, 21357, 21671, 21956], "FRONTERIZA INTIBUCANA": [21852, 21337, 21404, 21415, 21467, 21509, 21565, 21612, 21684, 21738, 21793, 21852], "PINALEJO": [18971, 18984, 17723, 17117, 17084, 18859, 18861, 18875, 17041, 17056, 17053, 17039], "YORO": [15196, 15296, 15384, 15127, 15172, 15240, 15324, 15284, 15476, 15620, 15710, 15842]}, "periodos": ["2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03"], "top20": ["SAGRADA FAMILIA", "ELGA", "CHOROTEGA", "OCOTEPEQUE", "INTIBUCANA", "EDUCADORES DE HONDURAS", "LA GUADALUPE", "CACEENP", "APAGUIZ", "FRATERNIDAD PESPIRENSE", "SAN MARQUEÑA", "CAYCSOL", "JUTICALPA", "CEIBEÑA", "RIO GRANDE", "TAULABE", "NUEVA VIDA", "FRONTERIZA INTIBUCANA", "PINALEJO", "YORO"], "growth": {"SAGRADA FAMILIA": {"abs": 2988, "pct": 0.9, "last": 317517}, "ELGA": {"abs": 10151, "pct": 4.0, "last": 262307}, "CHOROTEGA": {"abs": 7724, "pct": 4.7, "last": 173754}, "OCOTEPEQUE": {"abs": 4149, "pct": 4.3, "last": 101344}, "INTIBUCANA": {"abs": 3244, "pct": 4.4, "last": 77512}, "EDUCADORES DE HONDURAS": {"abs": 3655, "pct": 7.5, "last": 52287}, "LA GUADALUPE": {"abs": 974, "pct": 2.1, "last": 47378}, "CACEENP": {"abs": -2822, "pct": -5.9, "last": 44830}, "APAGUIZ": {"abs": 1874, "pct": 4.7, "last": 42068}, "FRATERNIDAD PESPIRENSE": {"abs": -564, "pct": -1.3, "last": 42042}, "SAN MARQUEÑA": {"abs": 998, "pct": 2.6, "last": 39692}, "CAYCSOL": {"abs": 9873, "pct": 35.4, "last": 37799}, "JUTICALPA": {"abs": 1825, "pct": 5.3, "last": 35972}, "CEIBEÑA": {"abs": 1881, "pct": 6.4, "last": 31418}, "RIO GRANDE": {"abs": 1436, "pct": 5.2, "last": 29206}, "TAULABE": {"abs": 520, "pct": 2.1, "last": 24776}, "NUEVA VIDA": {"abs": 2367, "pct": 12.1, "last": 21956}, "FRONTERIZA INTIBUCANA": {"abs": 0, "pct": 0.0, "last": 21852}, "PINALEJO": {"abs": -1932, "pct": -10.2, "last": 17039}, "YORO": {"abs": 646, "pct": 4.3, "last": 15842}}}};
+let DATA = null;
 
 let metrica='bg';
 let activeTab='abs';
@@ -526,7 +527,50 @@ function renderTrend(){
 }
 
 // Init
-render();
+// Cargar desde GitHub
+Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw]) => {
+  const bgRows = RD.agrupar(bgRaw, ['activos_net','prestamos','pasivos','obligaciones','patrimonio']);
+  const afRows = RD.agrupar(afRaw, ['total','hombres','mujeres','menores']);
+  const bgIdx = RD.buildIndex(bgRows);
+  const afIdx = RD.buildIndex(afRows);
+  const bgPeriodos = RD.periodos(bgRows);
+  const afPeriodos = RD.periodos(afRows);
+
+  function buildSeries(idx, periodos, top20, campo) {
+    const series = {};
+    top20.forEach(coop => {
+      series[coop] = periodos.map(p => idx[p]?.[coop]?.[campo] ?? null);
+    });
+    return series;
+  }
+
+  function calcGrowth(series) {
+    const g = {};
+    Object.entries(series).forEach(([coop, vals]) => {
+      const nonNull = vals.filter(v => v !== null);
+      if (nonNull.length >= 2) {
+        const first = nonNull[0], last = nonNull[nonNull.length-1];
+        g[coop] = {abs: last-first, pct: Math.round((last-first)/first*1000)/10, last};
+      }
+    });
+    return g;
+  }
+
+  const ultimo_bg = bgPeriodos.slice(-1)[0];
+  const ultimo_af = afPeriodos.slice(-1)[0];
+  const top20_bg = Object.entries(bgIdx[ultimo_bg]||{}).sort((a,b)=>b[1].activos_net-a[1].activos_net).slice(0,20).map(([c])=>c);
+  const top20_af = Object.entries(afIdx[ultimo_af]||{}).sort((a,b)=>b[1].total-a[1].total).slice(0,20).map(([c])=>c);
+  const last12_bg = bgPeriodos.slice(-12);
+  const last12_af = afPeriodos.slice(-12);
+  const bg_series = buildSeries(bgIdx, last12_bg, top20_bg, 'activos_net');
+  const af_series = buildSeries(afIdx, last12_af, top20_af, 'total');
+
+  DATA = {
+    bg: {series: bg_series, periodos: last12_bg, top20: top20_bg, growth: calcGrowth(bg_series)},
+    af: {series: af_series, periodos: last12_af, top20: top20_af, growth: calcGrowth(af_series)},
+  };
+  render();
+}).catch(e => console.error('Error:', e));
 </script>
 </body>
 </html>
