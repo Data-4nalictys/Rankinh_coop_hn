@@ -3,712 +3,415 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Ranking Cooperativo HN — Race Activos</title>
-
 <script src="data.js"></script>
-
 <style>
-
-:root{
-  --bg:#eaf8fb;
-  --text:#111827;
-  --muted:#6b7280;
-  --green:#16a34a;
-  --cay:#0f766e;
-}
-
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-}
-
+:root{ --cay:#0f766e; }
+*{ margin:0; padding:0; box-sizing:border-box; }
 body{
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  font-family:Arial,sans-serif;
-  background:
-    radial-gradient(circle at top left,#ffffff 0,#eaf8fb 38%,#dff3f7 100%);
-  color:var(--text);
+  width:100vw; height:100vh; overflow:hidden;
+  font-family:Arial,sans-serif; background:#000; color:white;
 }
-
+#bgVideo{
+  position:fixed; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:-3;
+}
+.overlay{
+  position:fixed; inset:0;
+  background:rgba(230,245,250,.72);
+  backdrop-filter:blur(2px); z-index:-2;
+}
 .page{
-  width:100vw;
-  height:100vh;
-  position:relative;
-  padding:26px 44px 76px;
+  width:100vw; height:100vh; position:relative;
+  padding:20px 42px 72px;
 }
-
-.header{
-  text-align:center;
-  margin-bottom:18px;
-}
-
+.header{ text-align:center; margin-bottom:10px; }
 .title{
-  font-size:34px;
-  font-weight:900;
-  letter-spacing:.02em;
-  text-shadow:2px 2px 0 #fff;
+  font-size:38px; font-weight:900; color:#111827;
+  text-shadow:0 3px 8px rgba(255,255,255,.7);
 }
+.subtitle{ font-size:13px; font-weight:700; color:#374151; margin-top:3px; }
 
-.subtitle{
-  font-size:13px;
-  color:var(--muted);
-  font-weight:700;
-  margin-top:4px;
-}
-
+/* CHART — posicionamiento absoluto de las filas */
 .chart{
   position:relative;
-  width:74vw;
-  height:73vh;
-  margin-top:8px;
+  width:72vw;
+  /* altura se calcula en JS */
 }
 
+/* Cada fila es absolute, se mueve con transform */
 .bar-row{
   position:absolute;
-  left:0;
-  width:100%;
-  height:42px;
-
+  left:0; width:100%;
+  height:40px;
   display:grid;
-
-  grid-template-columns:
-      215px
-      1fr
-      140px;
-
-  gap:10px;
-
+  grid-template-columns:240px 1fr 110px;
+  gap:8px;
   align-items:center;
-
+  /* transición de posición (transform) Y de opacidad */
   transition:
-      transform .45s linear,
-      opacity .25s linear;
+    transform 0.85s cubic-bezier(.22,1,.36,1),
+    opacity   0.4s linear;
+  will-change:transform;
 }
-
 .name{
-  font-size:14px;
-  font-weight:900;
-  text-align:right;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  padding-right:6px;
+  font-size:12px; font-weight:900; text-align:right;
+  color:#111827; padding-right:6px;
+  white-space:nowrap; overflow:visible;
 }
-
-.name.cay{
-  color:var(--cay);
-}
-
+.name.cay{ color:#0f766e; }
 .track{
-  height:31px;
-  background:rgba(255,255,255,.68);
-  border-radius:7px;
-  overflow:visible;
-  position:relative;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);
+  height:30px; background:rgba(255,255,255,.45);
+  border-radius:8px; overflow:visible; position:relative;
 }
-
 .bar{
-  height:100%;
-  border-radius:7px;
-
-  display:flex;
-  align-items:center;
-
-  padding:0 12px;
-
-  color:#111827;
-
-  font-size:13px;
-  font-weight:900;
-
-  min-width:52px;
-
-  transition:
-      width .45s linear;
-
-  box-shadow:0 3px 10px rgba(0,0,0,.12);
-
-  position:relative;
+  height:100%; border-radius:8px;
+  display:flex; align-items:center;
+  padding-left:10px; min-width:50px;
+  /* transición de ancho independiente */
+  transition:width 0.6s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  position:relative; overflow:visible;
 }
-
 .bar.cay{
-  background:
-      linear-gradient(
-          90deg,
-          #0f766e,
-          #22c55e
-      ) !important;
-
+  background:linear-gradient(90deg,#0f766e,#22c55e) !important;
   color:white;
 }
-
 .rank-inside{
-  font-size:15px;
-  font-weight:900;
+  font-size:14px; font-weight:900; color:#111827; white-space:nowrap;
 }
-
-.value{
-  font-size:14px;
-  font-weight:900;
-  white-space:nowrap;
-  color:#111827;
-}
-
+.bar.cay .rank-inside{ color:white; }
 .logo-float{
-  position:absolute;
-  right:-18px;
-  top:50%;
+  position:absolute; right:-17px; top:50%;
   transform:translateY(-50%);
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:white;
-  padding:3px;
-  box-shadow:0 3px 8px rgba(0,0,0,.18);
+  width:36px; height:36px; border-radius:50%;
+  background:white; padding:3px;
+  box-shadow:0 4px 12px rgba(0,0,0,.22);
+  overflow:hidden; flex-shrink:0;
+}
+.logo-float img{ width:100%; height:100%; object-fit:contain; }
+.value{
+  font-size:13px; font-weight:900; color:#111827; padding-left:8px;
 }
 
-.logo-float img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-}
-
+/* SIDE */
 .side{
-  position:absolute;
-  right:58px;
-  bottom:92px;
-  text-align:right;
+  position:absolute; right:55px; bottom:90px; text-align:right;
 }
-
-.year{
-  font-size:126px;
-  font-weight:900;
-  color:#2563eb;
-  line-height:.84;
-  letter-spacing:-.06em;
-  opacity:.9;
+.year-big{
+  font-size:140px; font-weight:900; color:#1d4ed8;
+  line-height:.85; opacity:.9;
 }
+.month-big{ font-size:32px; font-weight:900; color:#111827; }
+.total-sistema{ margin-top:8px; font-size:24px; font-weight:900; color:#00a651; }
 
-.month{
-  font-size:34px;
-  font-weight:900;
-  color:#111827;
-}
-
-.total{
-  margin-top:8px;
-  font-size:25px;
-  font-weight:900;
-  color:#00a651;
-}
-
+/* CONTROLS */
 .controls{
-  position:absolute;
-  left:42px;
-  right:42px;
-  bottom:26px;
-
-  display:flex;
-  align-items:center;
-  gap:14px;
+  position:absolute; left:40px; right:40px; bottom:22px;
+  display:flex; align-items:center; gap:12px;
 }
-
 button{
-  width:44px;
-  height:44px;
-  border-radius:50%;
-  border:none;
-  background:#111827;
-  color:white;
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
+  width:44px; height:44px; border:none; border-radius:50%;
+  background:#111827; color:white; font-size:17px; cursor:pointer;
+  flex-shrink:0;
 }
-
-input[type=range]{
-  flex:1;
-  accent-color:#16a34a;
-}
-
-.period{
-  width:115px;
-  font-size:13px;
-  font-weight:900;
-  color:#374151;
-}
-
-.badge{
-  position:absolute;
-  top:28px;
-  right:44px;
-  background:#fff;
-  border-radius:999px;
-  padding:8px 16px;
-  font-size:12px;
-  font-weight:900;
-  color:#0f766e;
-  box-shadow:0 2px 10px rgba(0,0,0,.12);
-}
-
+input[type=range]{ flex:1; accent-color:#16a34a; cursor:pointer; }
+.period-lbl{ width:130px; font-size:12px; font-weight:900; color:#111827; }
 .footer{
-  position:absolute;
-  right:44px;
-  bottom:28px;
-  font-size:10px;
-  color:#6b7280;
-  font-weight:700;
+  position:absolute; right:40px; bottom:6px;
+  font-size:10px; font-weight:800; color:#374151;
 }
 
+@media(max-width:900px){
+  .chart{ width:100%; }
+  .side{ right:16px; bottom:110px; }
+  .year-big{ font-size:80px; }
+  .month-big{ font-size:20px; }
+  .total-sistema{ font-size:16px; }
+  .bar-row{ grid-template-columns:130px 1fr 70px; }
+  .name{ font-size:9px; }
+  .value{ font-size:10px; }
+}
 </style>
 </head>
-
 <body>
 
+<video id="bgVideo" autoplay muted loop playsinline>
+  <source src="./media/honduras.mp4" type="video/mp4">
+</video>
+<div class="overlay"></div>
+
 <div class="page">
-
-  <div class="badge">
-    Ranking dinámico · Activos Netos
-  </div>
-
   <div class="header">
-
-    <div class="title">
-      Top Cooperativas de Honduras
-    </div>
-
-    <div class="subtitle">
-      Evolución mensual por activos netos · Fuente CONSUCOOP
-    </div>
-
+    <div class="title">Top Cooperativas de Honduras</div>
+    <div class="subtitle">Evolución histórica · Activos Netos · Fuente CONSUCOOP</div>
   </div>
 
   <div class="chart" id="chart"></div>
 
   <div class="side">
-
-    <div class="year" id="yearBig">----</div>
-
-    <div class="month" id="monthBig">—</div>
-
-    <div class="total" id="totalSistema">—</div>
-
+    <div class="year-big"  id="yearBig">----</div>
+    <div class="month-big" id="monthBig">—</div>
+    <div class="total-sistema" id="totalSistema">—</div>
   </div>
 
   <div class="controls">
-
     <button id="btnPlay">▶</button>
-
-    <input type="range"
-           id="slider"
-           min="0"
-           value="0">
-
-    <div class="period"
-         id="periodLabel">—</div>
-
+    <input type="range" id="slider" min="0" value="0">
+    <div class="period-lbl" id="periodLabel">—</div>
   </div>
 
-  <div class="footer">
-    CAYCSOL · Ranking Cooperativo Honduras
-  </div>
-
+  <div class="footer">Desarrollado por mrdatofl</div>
 </div>
 
 <script>
-
-const TOP_N = 18;
-
-const CAMPO = 'activos_net';
-
-const ROW_H = 42;
-
-const SPEED = 0.010;
+const TOP_N  = 20;
+const CAMPO  = 'activos_net';
+const ROW_H  = 44;          // px entre filas
+// velocidad: fracción de índice por frame (~60fps)
+// trimestral más lento, mensual más rápido — ajustado abajo en la lógica
+const SPEED_Q = 0.010;      // 2019-2024 trimestral (~40 seg total)
+const SPEED_M = 0.0125;     // 2025+ mensual (~20 seg total)
 
 const MESES = {
-
-  1:'Enero',
-  2:'Febrero',
-  3:'Marzo',
-  4:'Abril',
-  5:'Mayo',
-  6:'Junio',
-  7:'Julio',
-  8:'Agosto',
-  9:'Septiembre',
-  10:'Octubre',
-  11:'Noviembre',
-  12:'Diciembre'
+  1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',
+  7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'
 };
 
 const COLORS = [
-
-  '#f7a88c',
-  '#d8b4ce',
-  '#b9c2cc',
-  '#d1d5db',
-  '#bfdbfe',
-  '#fde68a',
-  '#fecaca',
-  '#bae6fd',
-  '#ddd6fe',
-  '#bbf7d0',
-  '#c7d2fe',
-  '#fbcfe8',
-  '#e5e7eb',
-  '#fed7aa',
-  '#a7f3d0',
-  '#bfdbfe',
-  '#fecdd3',
-  '#ddd6fe'
+  '#f7a88c','#d8b4ce','#aeb7c7','#c9ced6','#b7d0f3',
+  '#f8e18b','#f7c6c7','#b8e3ff','#d7cdfc','#b8f0c7',
+  '#becbff','#f7c5df','#e6e6e6','#ffd7a3','#9ff0d0',
+  '#bfd9ff','#ffcfda','#ddd6fe'
 ];
 
-let DATA = [];
-let PERIODOS = [];
-let IDX = {};
-
-let progress = 0;
-let playing = false;
-
-const chart = document.getElementById('chart');
-const slider = document.getElementById('slider');
-const btnPlay = document.getElementById('btnPlay');
-
-function slug(txt){
-
-  return String(txt || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g,'')
-    .replace(/ñ/g,'n')
-    .replace(/[^a-z0-9]+/g,'_')
+function slug(t){
+  return String(t||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/ñ/g,'n').replace(/[^a-z0-9]+/g,'_')
     .replace(/^_+|_+$/g,'');
 }
-
-function logoPath(coop){
-
-  return './logos/' + slug(coop) + '.png';
-}
-
 function fmtMill(n){
+  return (n/1e6).toLocaleString('en-US',{maximumFractionDigits:0})+' Mill';
+}
+function lerp(a,b,t){ return a+(b-a)*t; }
 
-  return (n / 1e6).toLocaleString(undefined,{
-    maximumFractionDigits:0
-  }) + ' Mill';
+// ── State ────────────────────────────────────────────────
+let PERIODOS=[], IDX={};
+let progress=0, playing=false;
+// pool de elementos DOM — nunca los destruimos
+const domPool = {};  // key=slug(coop) → {row,bar,name,value,rankEl,logo}
+
+const chart     = document.getElementById('chart');
+const slider    = document.getElementById('slider');
+const btnPlay   = document.getElementById('btnPlay');
+const yearBig   = document.getElementById('yearBig');
+const monthBig  = document.getElementById('monthBig');
+const totalEl   = document.getElementById('totalSistema');
+const periodLbl = document.getElementById('periodLabel');
+
+// ── Obtener/crear elemento DOM para una coop ─────────────
+function getOrCreateRow(coop, colorIdx){
+  const k = slug(coop);
+  if(domPool[k]) return domPool[k];
+  const isCay = coop.includes('CAYCSOL');
+
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+  row.style.opacity = '0';
+  // desactivar transición al crear (para no animar desde 0)
+  row.style.transition = 'none';
+
+  const color = isCay
+    ? 'linear-gradient(90deg,#0f766e,#22c55e)'
+    : COLORS[colorIdx % COLORS.length];
+
+  row.innerHTML = `
+    <div class="name${isCay?' cay':''}"></div>
+    <div class="track">
+      <div class="bar${isCay?' cay':''}" style="width:3%;background:${color}">
+        <span class="rank-inside"></span>
+        <div class="logo-float">
+          <img src="./logos/${k}.png" loading="lazy"
+               onerror="this.parentElement.style.display='none'">
+        </div>
+      </div>
+    </div>
+    <div class="value"></div>`;
+
+  chart.appendChild(row);
+
+  const el = {
+    row,
+    bar:   row.querySelector('.bar'),
+    name:  row.querySelector('.name'),
+    value: row.querySelector('.value'),
+    rank:  row.querySelector('.rank-inside'),
+  };
+  domPool[k] = el;
+  return el;
 }
 
-function fallbackLogo(img){
+// ── Render interpolado entre dos periodos ────────────────
+function renderInterpolated(iA, iB, t){
+  const p1 = PERIODOS[iA];
+  const p2 = PERIODOS[Math.min(iB, PERIODOS.length-1)];
+  if(!p1) return;
 
-  img.style.display = 'none';
-
-  img.parentElement.innerHTML = '🏦';
-
-  img.parentElement.style.fontSize = '22px';
-}
-
-function lerp(a,b,t){
-
-  return a + (b-a)*t;
-}
-
-function getRows(periodo){
-
-  return IDX[periodo]
-      ? Object.values(IDX[periodo])
-      : [];
-}
-
-function renderInterpolated(a,b,t){
-
-  const p1 = PERIODOS[a];
-  const p2 = PERIODOS[b];
-
-  const r1 = getRows(p1);
-  const r2 = getRows(p2);
+  // construir mapa interpolado
+  const rows1 = IDX[p1] ? Object.values(IDX[p1]) : [];
+  const rows2 = IDX[p2] ? Object.values(IDX[p2]) : [];
 
   const map = {};
-
-  [...r1,...r2].forEach(x=>{
-
-    const key = slug(x.coop);
-
-    if(map[key]) return;
-
-    const d1 = r1.find(v=>slug(v.coop)===key);
-    const d2 = r2.find(v=>slug(v.coop)===key);
-
-    map[key] = {
-
-      coop:x.coop,
-
-      value:
-        lerp(
-          d1?.[CAMPO] || 0,
-          d2?.[CAMPO] || 0,
-          t
-        )
+  [...rows1,...rows2].forEach(x=>{
+    const k = slug(x.coop);
+    if(map[k]) return;
+    const d1 = rows1.find(v=>slug(v.coop)===k);
+    const d2 = rows2.find(v=>slug(v.coop)===k);
+    map[k] = {
+      coop: x.coop,
+      value: lerp(d1?.[CAMPO]||0, d2?.[CAMPO]||0, t)
     };
   });
 
   const sorted = Object.values(map)
-
     .sort((a,b)=>b.value-a.value)
-
-    .slice(0,TOP_N);
+    .slice(0, TOP_N);
 
   const max = sorted[0]?.value || 1;
+  // Total: usar el periodo real más cercano (sin interpolación)
+  const totalRows = IDX[p1] ? Object.values(IDX[p1]) : [];
+  const total = totalRows.reduce((s,d)=>s+(d[CAMPO]||0),0);
 
-  const totalSistema = sorted.reduce(
-      (s,d)=>s+d.value,
-      0
-  );
-
-  const [anio,mesTxt] = p1.split('-');
-
+  // actualizar header
+  const [anio, mesTxt] = p1.split('-');
   const mes = parseInt(mesTxt);
+  yearBig.textContent  = anio;
+  monthBig.textContent = MESES[mes]||'';
+  totalEl.textContent  = 'Activos Netos: '+fmtMill(total);
+  periodLbl.textContent= `${MESES[mes]} ${anio}`;
 
-  document.getElementById('yearBig').textContent =
-      anio;
+  // altura del chart
+  chart.style.height = (TOP_N * ROW_H + 20) + 'px';
 
-  document.getElementById('monthBig').textContent =
-      MESES[mes];
+  // marcar todas como invisibles temporalmente
+  Object.values(domPool).forEach(el=>{ el._inTop=false; });
 
-  document.getElementById('periodLabel').textContent =
-      MESES[mes] + ' ' + anio;
-
-  document.getElementById('totalSistema').textContent =
-      'Activos Netos: ' + fmtMill(totalSistema);
-
-  const existentes = new Set();
-
+  // actualizar / crear filas
   sorted.forEach((d,i)=>{
+    const k = slug(d.coop);
+    const el = getOrCreateRow(d.coop, i);
+    el._inTop = true;
 
-    const key = slug(d.coop);
+    const pct = Math.max((d.value/max)*82, 3);
 
-    existentes.add(key);
+    // actualizar contenido
+    el.name.textContent  = d.coop;
+    el.value.textContent = fmtMill(d.value);
+    el.rank.textContent  = '#'+(i+1);
+    el.bar.style.width   = pct+'%';
 
-    let row = document.getElementById('row_' + key);
+    // posición vertical via transform
+    const targetY = i * ROW_H;
+    el.row.style.transform = `translate3d(0,${targetY}px,0)`;
+    el.row.style.opacity   = '1';
 
-    const pct =
-      Math.max((d.value/max)*100,2);
-
-    const isCay =
-      d.coop.includes('CAYCSOL');
-
-    if(!row){
-
-      row = document.createElement('div');
-
-      row.className = 'bar-row';
-
-      row.id = 'row_' + key;
-
-      row.innerHTML = `
-
-        <div class="name ${isCay?'cay':''}">
-          ${d.coop}
-        </div>
-
-        <div class="track">
-
-          <div class="bar ${isCay?'cay':''}"
-               id="bar_${key}">
-
-            <span class="rank-inside">
-              #${i+1}
-            </span>
-
-            <div class="logo-float">
-
-              <img src="${logoPath(d.coop)}"
-                   onerror="fallbackLogo(this)">
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="value"
-             id="val_${key}">
-        </div>
-      `;
-
-      chart.appendChild(row);
+    // activar transición si aún no está activa
+    if(el.row.style.transition === 'none'){
+      // microtask para que se aplique la posición inicial primero
+      requestAnimationFrame(()=>{
+        el.row.style.transition = '';
+      });
     }
-
-    row.style.opacity = '1';
-
-    row.style.transform =
-      `translateY(${i * ROW_H}px)`;
-
-    const bar =
-      document.getElementById('bar_' + key);
-
-    const val =
-      document.getElementById('val_' + key);
-
-    const name =
-      row.querySelector('.name');
-
-    name.classList.toggle('cay',isCay);
-
-    bar.classList.toggle('cay',isCay);
-
-    bar.style.width = pct + '%';
-
-    if(!isCay){
-
-      bar.style.background =
-        COLORS[i % COLORS.length];
-    }
-
-    bar.innerHTML = `
-
-      <span class="rank-inside">
-        #${i+1}
-      </span>
-
-      <div class="logo-float">
-
-        <img src="${logoPath(d.coop)}"
-             onerror="fallbackLogo(this)">
-
-      </div>
-    `;
-
-    val.textContent = fmtMill(d.value);
   });
 
-  document.querySelectorAll('.bar-row')
-    .forEach(row=>{
+  // ocultar las que salieron del top
+  Object.values(domPool).forEach(el=>{
+    if(!el._inTop){
+      el.row.style.opacity   = '0';
+      el.row.style.transform = `translate3d(0,${TOP_N*ROW_H}px,0)`;
+    }
+  });
 
-      const key =
-        row.id.replace('row_','');
+  slider.value = iA;
+}
 
-      if(!existentes.has(key)){
+// ── Loop de animación ────────────────────────────────────
+function getSpeed(){
+  const p = PERIODOS[Math.floor(progress)];
+  if(!p) return SPEED_Q;
+  const y = parseInt(p.split('-')[0]);
+  const baseSpeed = y >= 2025 ? SPEED_M : SPEED_Q;
 
-        row.style.opacity = '0';
+  // Ease-in: primeros 3 periodos arrancan al 15% de la velocidad
+  // y suben gradualmente hasta 100% en el periodo 5
+  const easeFrames = 5.0;
+  const easeFactor = progress < easeFrames
+    ? 0.15 + 0.85 * (progress / easeFrames)
+    : 1.0;
 
-        row.style.transform =
-          `translateY(${TOP_N * ROW_H}px)`;
-      }
-    });
-
-  slider.value = a;
+  return baseSpeed * easeFactor;
 }
 
 function animate(){
-
   if(!playing) return;
-
-  progress += SPEED;
-
-  const actual =
-      Math.floor(progress);
-
-  const siguiente =
-      Math.min(
-          actual + 1,
-          PERIODOS.length - 1
-      );
-
-  const blend =
-      progress - actual;
-
-  renderInterpolated(
-      actual,
-      siguiente,
-      blend
-  );
-
-  if(progress >= PERIODOS.length-1){
-
-    progress = 0;
-  }
-
+  progress += getSpeed();
+  if(progress >= PERIODOS.length-1) progress = 0;
+  const iA = Math.floor(progress);
+  const iB = iA+1;
+  const t  = progress - iA;
+  renderInterpolated(iA, iB, t);
   requestAnimationFrame(animate);
 }
 
 function togglePlay(){
-
   playing = !playing;
-
-  btnPlay.textContent =
-      playing ? '⏸' : '▶';
-
-  if(playing){
-
-    requestAnimationFrame(animate);
-  }
+  btnPlay.textContent = playing ? '⏸' : '▶';
+  if(playing) requestAnimationFrame(animate);
 }
 
-RD.loadBalanceGeneral()
-
-.then(raw=>{
-
-  DATA = RD.agrupar(raw,[
-
-    'activos_net',
-    'activos_tot',
-    'prestamos',
-    'pasivos',
-    'obligaciones',
-    'patrimonio',
-    'provisiones'
+// ── Cargar datos ─────────────────────────────────────────
+RD.loadBalanceGeneral().then(raw=>{
+  const data = RD.agrupar(raw,[
+    'activos_net','activos_tot','prestamos',
+    'pasivos','obligaciones','patrimonio','provisiones'
   ]);
 
-  PERIODOS = RD.periodos(DATA);
+  // filtrar periodos: trimestral 2019-2024, mensual 2025+
+  const allP = RD.periodos(data);
+  PERIODOS = allP.filter(p=>{
+    const [y,m] = p.split('-').map(Number);
+    if(y < 2019) return false;
+    if(y <= 2024) return [3,6,9,12].includes(m);
+    return true; // 2025+: todos los meses
+  }).sort();
 
-  IDX = RD.buildIndex(DATA);
+  IDX = RD.buildIndex(data);
 
-  slider.max =
-      PERIODOS.length - 1;
+  slider.max = PERIODOS.length-1;
 
-  slider.addEventListener('input',e=>{
-
+  slider.addEventListener('input', e=>{
+    playing = false;
+    btnPlay.textContent = '▶';
     progress = Number(e.target.value);
-
     renderInterpolated(
-        progress,
-        Math.min(
-          progress+1,
-          PERIODOS.length-1
-        ),
-        0
+      Math.floor(progress),
+      Math.min(Math.floor(progress)+1, PERIODOS.length-1),
+      0
     );
   });
 
-  btnPlay.addEventListener(
-      'click',
-      togglePlay
-  );
+  btnPlay.addEventListener('click', togglePlay);
 
+  // render inicial sin transición
   renderInterpolated(0,1,0);
-})
+  // iniciar reproducción
+  setTimeout(togglePlay, 300);
 
-.catch(err=>{
-
-  chart.innerHTML = `
-
-    <div style="
-      font-size:22px;
-      font-weight:900;
-      color:#b91c1c
-    ">
-
-      Error cargando datos:
-      ${err.message}
-
-    </div>
-  `;
+}).catch(err=>{
+  chart.innerHTML = `<div style="font-size:22px;font-weight:900;color:#b91c1c;padding:40px">
+    Error: ${err.message}</div>`;
 });
-
 </script>
-
 </body>
 </html>
