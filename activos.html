@@ -160,15 +160,16 @@ function render(){
   const allRows = IDX[p] ? Object.values(IDX[p]) : [];const totalSistema = allRows.reduce((sum, d) => sum + (d.activos_net || 0),0);
   if(!sorted.length) return;
   const max=sorted[0].activos_net;
-  const cay=sorted.find(d=>d.coop.includes('CAYCSOL'));
-  const t10=sorted[9];
+  // Buscar CAYCSOL en TODOS los datos, no solo el top 20
+  const cay=allSorted.find(d=>d.coop.includes('CAYCSOL'));
+  const t10=allSorted[9];
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
   document.getElementById('kpiTotal').textContent = fmt(totalSistema);
   if(cay){
-    const r=sorted.indexOf(cay)+1;
+    const r=allSorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
-    document.getElementById('kpiSub').textContent=r<=10?'✓ En el Top 10':'Fuera del Top 10';
+    document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
     document.getElementById('kpiVal').textContent=fmt(cay.activos_net);
     
     if(t10&&r>10){document.getElementById('kpiGap').textContent=fmt(t10.activos_net-cay.activos_net);document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;}

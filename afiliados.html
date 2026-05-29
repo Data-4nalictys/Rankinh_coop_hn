@@ -168,9 +168,10 @@ function render(){
 
   const allRows = IDX[p] ? Object.values(IDX[p]) : [];
 
-  const sorted = [...allRows]
-      .sort((a,b)=>b.total-a.total)
-      .slice(0,20);
+  const allSorted = [...allRows]
+      .sort((a,b)=>b.total-a.total);
+
+  const sorted = allSorted.slice(0,20);
 
   if(!sorted.length) return;
 
@@ -181,8 +182,9 @@ function render(){
       0
   );
 
-  const cay = sorted.find(d=>d.coop.includes('CAYCSOL'));
-  const t10 = sorted[9];
+  // Buscar CAYCSOL en TODOS los datos, no solo el top 20
+  const cay = allSorted.find(d=>d.coop.includes('CAYCSOL'));
+  const t10 = allSorted[9];
 
   const [y,m] = p.split('-');
 
@@ -191,12 +193,12 @@ function render(){
 
   if(cay){
 
-      const r = sorted.indexOf(cay)+1;
+      const r = allSorted.indexOf(cay)+1;
 
       document.getElementById('kpiRank').textContent='#'+r;
 
       document.getElementById('kpiSub').textContent =
-          r<=10 ? '✓ En el Top 10' : 'Fuera del Top 10';
+          r<=10 ? '✓ Top 10' : r<=20 ? 'Top 20' : '#'+r+' de '+allSorted.length;
 
       document.getElementById('kpiVal').textContent =
           cay.total.toLocaleString();

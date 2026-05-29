@@ -130,18 +130,21 @@ function onYearChange(){
 }
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const allRows = IDX[p] ? Object.values(IDX[p]) : [];const totalSistema = allRows.reduce((sum, d) => sum + (d.excedentes || 0),0);
-  const sorted = [...allRows].sort((a,b)=>b.excedentes-a.excedentes).slice(0,20);
-    if(!sorted.length) return;
+  const allRows = IDX[p] ? Object.values(IDX[p]) : [];
+  const totalSistema = allRows.reduce((sum,d)=>sum+(d.excedentes||0),0);
+  const allSorted = [...allRows].sort((a,b)=>b.excedentes-a.excedentes);
+  const sorted = allSorted.slice(0,20);
+  if(!sorted.length) return;
   const max=sorted[0].excedentes;
-  const cay=sorted.find(d=>d.coop.includes('CAYCSOL'));
+  // Buscar CAYCSOL en TODOS los datos, no solo el top 20
+  const cay=allSorted.find(d=>d.coop.includes('CAYCSOL'));
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
   document.getElementById('kpiTotal').textContent=fmt(totalSistema);
-    if(cay){
-    const r=sorted.indexOf(cay)+1;
+  if(cay){
+    const r=allSorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
-    document.getElementById('kpiSub').textContent=r<=10?'✓ En el Top 10':'Fuera del Top 10';
+    document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
     document.getElementById('kpiVal').textContent=fmt(cay.excedentes);
     document.getElementById('kpiExtra').textContent=fmt(cay.ingresos);}
   let html='';
