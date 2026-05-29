@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranking HN — Ranking de Egresos</title>
+<title>Ranking HN — Ranking de Aportaciones</title>
 <style>
 :root{--bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;--accent:#1a6b4a;--accent-light:#eaf7f1;--text:#111827;--text2:#6b7280;--muted:#9ca3af;--sh:0 1px 3px rgba(0,0,0,.06)}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;overflow:hidden}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;overflow:hidden}
 .shell{display:grid;grid-template-columns:192px 1fr;grid-template-rows:56px 1fr;height:100vh}
 @media(max-width:700px){.shell{grid-template-columns:1fr}.sidebar{display:none}}
 .topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--sh);flex-wrap:wrap;gap:6px}
@@ -13,43 +14,59 @@
 .brand-txt{font-size:14px;font-weight:900;color:var(--text)}.brand-sub{font-size:10px;color:var(--muted)}
 .period-pill{background:var(--accent-light);border:1px solid #a7d9c0;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap}
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:14px 0;display:flex;flex-direction:column;overflow:hidden}
-.nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}.nav-sec:first-child{padding-top:0}
+.nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.nav-sec:first-child{padding-top:0}
 .nav-a{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:.1s}
-.nav-a:hover{color:var(--text);background:var(--bg)}.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
-.nav-icon{width:15px;text-align:center;font-size:12px}.nav-sep{height:1px;background:var(--border);margin:8px 14px}
+.nav-a:hover{color:var(--text);background:var(--bg)}
+.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.nav-icon{width:15px;text-align:center;font-size:12px}
+.nav-sep{height:1px;background:var(--border);margin:8px 14px}
 .nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
 .main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .ph{padding:14px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
 .ph-title{font-size:20px;font-weight:900;color:var(--text)}.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 .sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
-.sel:focus{outline:none;border-color:var(--accent)}.sel-w{position:relative;display:inline-block}
+.sel:focus{outline:none;border-color:var(--accent)}
+.sel-w{position:relative;display:inline-block}
 .sel-w::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:9px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 20px 10px;flex-shrink:0}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;box-shadow:var(--sh)}
 .kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
-.kpi-val{font-size:20px;font-weight:900;color:var(--text);line-height:1}.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
-.kpi-cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f0fbf5,#eaf7f1)}.kpi-cay .kpi-val{color:var(--accent)}
+.kpi-val{font-size:20px;font-weight:900;color:var(--text);line-height:1}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.kpi-cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f0fbf5,#eaf7f1)}
+.kpi-cay .kpi-val{color:var(--accent)}
 .tbl-wrap{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 14px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
-.tbl-wrap::-webkit-scrollbar{width:4px}.tbl-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+.tbl-wrap::-webkit-scrollbar{width:4px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
 .th,.tr{display:grid;grid-template-columns:36px 200px 1fr 110px 110px;align-items:center;min-width:0}
 @media(max-width:900px){.th,.tr{grid-template-columns:30px 150px 1fr 90px 90px}}
+@media(max-width:600px){.th,.tr{grid-template-columns:26px 1fr 110px 80px 80px}}
 .th{padding:0 6px 6px;border-bottom:2px solid var(--border);margin-bottom:2px;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
 .tr{padding:4px 6px;border-radius:7px;border:1px solid transparent;transition:.1s}
 .tr:hover{background:var(--surface);box-shadow:var(--sh);border-color:var(--border)}
 .tr.caycsol-row{background:var(--accent-light);border-color:#a7d9c0}
-.rn{font-size:17px;font-weight:900;text-align:center;color:var(--muted)}.rn.gold{color:#d97706}.rn.silver{color:#94a3b8}.rn.bronze{color:#b45309}
-.cn{font-size:12px;font-weight:700;color:var(--text);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cn.cay{color:var(--accent)}
-.bc{padding-right:8px;min-width:0}.bt{width:100%;height:20px;background:var(--surface2);border-radius:5px;overflow:hidden;border:1px solid var(--border);position:relative}
+.rn{font-size:17px;font-weight:900;text-align:center;color:var(--muted)}
+.rn.gold{color:#d97706}.rn.silver{color:#94a3b8}.rn.bronze{color:#b45309}
+.cn{font-size:12px;font-weight:700;color:var(--text);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cn.cay{color:var(--accent)}
+.bc{padding-right:8px;min-width:0}
+.bt{width:100%;height:20px;background:var(--surface2);border-radius:5px;overflow:hidden;border:1px solid var(--border);position:relative}
 .bf{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;font-size:10px;font-weight:700;color:#fff;transition:width .55s cubic-bezier(.4,0,.2,1);min-width:0;white-space:nowrap;overflow:hidden}
 .bv-out{position:absolute;top:0;height:100%;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:700;color:var(--text2);pointer-events:none}
 .c1{background:linear-gradient(90deg,#1e40af,#3b82f6)}.c2{background:linear-gradient(90deg,#1e3a8a,#2563eb)}.c3{background:linear-gradient(90deg,#1e3a8a,#1d4ed8)}.cn_{background:linear-gradient(90deg,#6b7280,#9ca3af)}.cc{background:linear-gradient(90deg,#065f46,#16a34a)}
-.vc{font-size:11px;font-weight:700;color:var(--text2);text-align:right;padding:0 4px}.vc.pos{color:#16a34a}.vc.neg{color:#dc2626}
+.vc{font-size:11px;font-weight:700;color:var(--text2);text-align:right;padding:0 4px}
+.vc.pos{color:#16a34a}.vc.neg{color:#dc2626}
 .loading{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:12px;color:var(--muted)}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}.tr{animation:fu .18s ease both}
-</style></head><body>
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tr{animation:fu .18s ease both}
+</style>
+</head>
+<body>
 <div class="shell">
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:10px">
@@ -64,10 +81,10 @@
   <a class="nav-a " href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
   <a class="nav-a " href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
   <a class="nav-a " href="pasivos.html"><span class="nav-icon">📊</span>Exigibilidades</a>
-  <a class="nav-a " href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
+  <a class="nav-a active" href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
   <div class="nav-sec">Resultados</div>
   <a class="nav-a " href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
-  <a class="nav-a active" href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
+  <a class="nav-a " href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
   <a class="nav-a " href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
@@ -80,7 +97,7 @@
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Ranking de Egresos</div><div class="ph-sub">Top 20 cooperativas · gastos financieros y de administración</div></div>
+    <div><div class="ph-title">Ranking de Aportaciones</div><div class="ph-sub">Top 20 cooperativas · capital aportado por los socios</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -88,14 +105,16 @@
   </div>
   <div class="kpis">
     <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Posición</div><div class="kpi-val" id="kpiRank">—</div><div class="kpi-sub" id="kpiSub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Egresos CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
-    <div class="kpi"><div class="kpi-lbl">Gastos Financieros</div><div class="kpi-val" id="kpiExtra">—</div><div class="kpi-sub">CAYCSOL periodo</div></div>
+    <div class="kpi"><div class="kpi-lbl">Aportaciones CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
+    <div class="kpi"><div class="kpi-lbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
     <div class="kpi"><div class="kpi-lbl">Total sistema</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub">Sistema Cooperativo</div></div>
   </div>
   <div class="tbl-wrap">
     <div class="th">
       <div style="text-align:center">#</div><div>Cooperativa</div>
-      <div>Egresos (M)</div><div style="text-align:right">Gtos. Admin.</div><div style="text-align:right">Excedentes</div>
+      <div>Aportaciones (M)</div>
+      <div style="text-align:right">Activos Netos</div>
+      <div style="text-align:right">Patrimonio</div>
     </div>
     <div id="rows"><div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div></div>
   </div>
@@ -109,59 +128,73 @@ const selYear=document.getElementById('selYear');
 const selMonth=document.getElementById('selMonth');
 function fmt(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
 
-RD.loadEstadoResultados().then(raw=>{
-  ROWS=RD.agrupar(raw,['ingresos','egresos','excedentes','prod_fin','gast_fin','gast_adm']);
-  PERIODOS=RD.periodos(ROWS);IDX=RD.buildIndex(ROWS);
+RD.loadBalanceGeneral().then(raw=>{
+  ROWS=RD.agrupar(raw,['activos_net','activos_tot','prestamos','pasivos','obligaciones','patrimonio','provisiones']);
+  PERIODOS=RD.periodos(ROWS);
+  IDX=RD.buildIndex(ROWS);
   const ultimo=RD.ultimoPeriodo(ROWS);
   const years=[...new Set(PERIODOS.map(p=>p.split('-')[0]))].sort();
   years.forEach(y=>selYear.add(new Option(y,y)));
   const[ly,lm]=ultimo.split('-');
   selYear.value=ly;
-  PERIODOS.filter(p=>p.startsWith(ly)).forEach(p=>{const m=parseInt(p.split('-')[1]);selMonth.add(new Option(MESES[m],m));});
+  PERIODOS.filter(p=>p.startsWith(ly)).forEach(p=>{
+    const m=parseInt(p.split('-')[1]);
+    selMonth.add(new Option(MESES[m],m));
+  });
   selMonth.value=parseInt(lm);
-  selYear.addEventListener('change',onYearChange);selMonth.addEventListener('change',render);
+  selYear.addEventListener('change',onYearChange);
+  selMonth.addEventListener('change',render);
   render();
 }).catch(e=>{document.getElementById('rows').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
 
 function onYearChange(){
   const y=selYear.value;selMonth.innerHTML='';
   PERIODOS.filter(p=>p.startsWith(y)).forEach(p=>{const m=parseInt(p.split('-')[1]);selMonth.add(new Option(MESES[m],m));});
-  selMonth.value=Math.max(...PERIODOS.filter(p=>p.startsWith(y)).map(p=>parseInt(p.split('-')[1])));render();
+  selMonth.value=Math.max(...PERIODOS.filter(p=>p.startsWith(y)).map(p=>parseInt(p.split('-')[1])));
+  render();
 }
+
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const allRows = IDX[p] ? Object.values(IDX[p]) : [];const totalSistema = allRows.reduce((sum, d) => sum + (d.egresos || 0), 0);
-  const sorted = [...allRows].sort((a,b)=>b.egresos-a.egresos).slice(0,20);
-
+  const allRows=IDX[p]?Object.values(IDX[p]):[];
+  const totalSistema=allRows.reduce((sum,d)=>sum+(d.patrimonio||0),0);
+  const sorted=[...allRows].sort((a,b)=>b.patrimonio-a.patrimonio).slice(0,20);
   if(!sorted.length) return;
-  const max=sorted[0].egresos;
+  const max=sorted[0].patrimonio;
   const cay=sorted.find(d=>d.coop.includes('CAYCSOL'));
+  const t10=sorted[9];
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
-  document.getElementById('kpiTotal').textContent = fmt(totalSistema);
+  document.getElementById('kpiTotal').textContent=fmt(totalSistema);
   if(cay){
     const r=sorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
     document.getElementById('kpiSub').textContent=r<=10?'✓ En el Top 10':'Fuera del Top 10';
-    document.getElementById('kpiVal').textContent=fmt(cay.egresos);
-    document.getElementById('kpiExtra').textContent=fmt(cay.gast_fin);}
+    document.getElementById('kpiVal').textContent=fmt(cay.patrimonio);
+    if(t10&&r>10){document.getElementById('kpiGap').textContent=fmt(t10.patrimonio-cay.patrimonio);document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;}
+    else{document.getElementById('kpiGap').textContent='Top 10';document.getElementById('kpiGapSub').textContent='Objetivo logrado 🎯';}
+  }
   let html='';
   sorted.forEach((d,i)=>{
-    const r=i+1,pct=Math.max(d.egresos/max*100,1);
+    const r=i+1,pct=Math.max(d.patrimonio/max*100,1);
     const isCay=d.coop.includes('CAYCSOL');
     const rCls=r===1?'gold':r===2?'silver':r===3?'bronze':'';
     const bCls=isCay?'cc':r===1?'c1':r===2?'c2':r===3?'c3':'cn_';
-    const inside=pct>=20;const val=fmt(d.egresos);
+    const inside=pct>=20;
+    const val=fmt(d.patrimonio);
     html+=`<div class="tr${isCay?' caycsol-row':''}">
-      <div class="rn ${rCls}">${r}</div><div class="cn${isCay?' cay':''}">${d.coop}</div>
+      <div class="rn ${rCls}">${r}</div>
+      <div class="cn${isCay?' cay':''}">${d.coop}</div>
       <div class="bc"><div class="bt">
         <div class="bf ${bCls}" style="width:${pct}%">${inside?val:''}</div>
         ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
       </div></div>
-      <div class="vc">${fmt(d.gast_fin)}</div>
-      <div class="vc">${fmt(d.gast_adm)}</div>
+      <div class="vc">${fmt(d.activos_net)}</div>
+      <div class="vc">${fmt(d.patrimonio)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
 }
-</script></body></html>
+</script>
+</body>
+</html>

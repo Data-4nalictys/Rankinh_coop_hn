@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranking HN — Ranking de Pasivos</title>
+<title>Ranking HN — Ranking de Exigibilidades por Depósitos</title>
 <style>
 :root{--bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;--accent:#1a6b4a;--accent-light:#eaf7f1;--text:#111827;--text2:#6b7280;--muted:#9ca3af;--sh:0 1px 3px rgba(0,0,0,.06)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -80,7 +80,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <a class="nav-a " href="afiliados.html"><span class="nav-icon">👥</span>Afiliados</a>
   <a class="nav-a " href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
   <a class="nav-a " href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
-  <a class="nav-a active" href="pasivos.html"><span class="nav-icon">📊</span>Pasivos</a>
+  <a class="nav-a active" href="pasivos.html"><span class="nav-icon">📊</span>Exigibilidades</a>
+  <a class="nav-a " href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
   <div class="nav-sec">Resultados</div>
   <a class="nav-a " href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
   <a class="nav-a " href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
@@ -96,7 +97,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Ranking de Pasivos</div><div class="ph-sub">Top 20 cooperativas · pasivos totales y obligaciones</div></div>
+    <div><div class="ph-title">Ranking de Exigibilidades por Depósitos</div><div class="ph-sub">Top 20 cooperativas · exigibilidades por depósitos y obligaciones</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -104,14 +105,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   </div>
   <div class="kpis">
     <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Posición</div><div class="kpi-val" id="kpiRank">—</div><div class="kpi-sub" id="kpiSub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Pasivos CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
-    <div class="kpi"><div class="kpi-lbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
+    <div class="kpi"><div class="kpi-lbl">Exigibilidades CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
+    <div class="kpi"><div class="kpi-lbl">Total Sistema</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub">Sistema Cooperativo</div></div>
     <div class="kpi"><div class="kpi-lbl">Obligaciones CAYCSOL</div><div class="kpi-val" id="kpiExtra">—</div><div class="kpi-sub">CAYCSOL periodo</div></div>
   </div>
   <div class="tbl-wrap">
     <div class="th">
       <div style="text-align:center">#</div><div>Cooperativa</div>
-      <div>Pasivos Totales (M)</div>
+      <div>Exigibilidades (M)</div>
       <div style="text-align:right">Obligaciones</div>
       <div style="text-align:right">Patrimonio</div>
     </div>
@@ -155,21 +156,21 @@ function onYearChange(){
 
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const sorted=(IDX[p]?Object.values(IDX[p]):[]).sort((a,b)=>b.pasivos-a.pasivos).slice(0,20);
+  const allRows=IDX[p]?Object.values(IDX[p]):[];
+  const totalSistema=allRows.reduce((sum,d)=>sum+(d.pasivos||0),0);
+  const sorted=[...allRows].sort((a,b)=>b.pasivos-a.pasivos).slice(0,20);
   if(!sorted.length) return;
   const max=sorted[0].pasivos;
   const cay=sorted.find(d=>d.coop.includes('CAYCSOL'));
-  const t10=sorted[9];
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
+  document.getElementById('kpiTotal').textContent=fmt(totalSistema);
   if(cay){
     const r=sorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
     document.getElementById('kpiSub').textContent=r<=10?'✓ En el Top 10':'Fuera del Top 10';
     document.getElementById('kpiVal').textContent=fmt(cay.pasivos);
     document.getElementById('kpiExtra').textContent=fmt(cay.obligaciones);
-    if(t10&&r>10){document.getElementById('kpiGap').textContent=fmt(t10.pasivos-cay.pasivos);document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;}
-    else{document.getElementById('kpiGap').textContent='Top 10';document.getElementById('kpiGapSub').textContent='Objetivo logrado 🎯';}
   }
   let html='';
   sorted.forEach((d,i)=>{
