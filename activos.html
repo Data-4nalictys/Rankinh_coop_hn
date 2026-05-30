@@ -259,8 +259,10 @@ function onYearChange(){
 
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const sorted=(IDX[p]?Object.values(IDX[p]):[]).sort((a,b)=>b.activos_net-a.activos_net).slice(0,20);
-  const allRows = IDX[p] ? Object.values(IDX[p]) : [];const totalSistema = allRows.reduce((sum, d) => sum + (d.activos_net || 0),0);
+  const allRows = IDX[p] ? Object.values(IDX[p]) : [];
+  const totalSistema = allRows.reduce((sum, d) => sum + (d.activos_net || 0), 0);
+  const allSorted = [...allRows].sort((a,b) => b.activos_net - a.activos_net);
+  const sorted = allSorted.slice(0, 20);
   if(!sorted.length) return;
   const max=sorted[0].activos_net;
   // Buscar CAYCSOL en TODOS los datos, no solo el top 20
