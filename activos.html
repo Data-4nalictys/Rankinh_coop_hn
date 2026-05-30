@@ -65,6 +65,109 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 @keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 .tr{animation:fu .18s ease both}
 </style>
+
+<style id="print-styles">
+/* ══ BOTÓN EXPORTAR ══ */
+.btn-export {
+  display: flex; align-items: center; gap: 6px;
+  background: #1a6b4a; color: #fff;
+  border: none; border-radius: 7px;
+  padding: 7px 14px; font-size: 12px;
+  font-family: Arial, sans-serif; font-weight: 700;
+  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: background .15s; flex-shrink: 0;
+}
+.btn-export:hover { background: #15573c; }
+.btn-export-all {
+  background: #1d4ed8;
+}
+.btn-export-all:hover { background: #1e3a8a; }
+
+/* ══ PRINT MEDIA ══ */
+@media print {
+  /* Reset */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    background: #f0f2f5 !important;
+  }
+  
+  /* Layout: ocultar sidebar, full width */
+  .shell {
+    display: block !important;
+    height: auto !important;
+  }
+  .sidebar { display: none !important; }
+  .topbar {
+    display: flex !important;
+    position: relative !important;
+    grid-column: unset !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+  
+  /* Ocultar controles de UI */
+  .btn-export, .controls, .sel-w, .sel { display: none !important; }
+  
+  /* Main: mostrar todo */
+  .main {
+    overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  
+  .ph { page-break-after: avoid; break-after: avoid; }
+  
+  /* KPIs sin corte */
+  .kpis {
+    display: grid !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    padding: 0 20px 10px !important;
+  }
+  
+  /* Tabla: mostrar TODO el scroll */
+  .tbl-wrap {
+    overflow: visible !important;
+    flex: unset !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 0 20px 14px !important;
+  }
+  
+  /* Filas: sin animación, sin corte */
+  .tr {
+    animation: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Período visible en header */
+  .period-pill { display: block !important; }
+  
+  /* Chart canvas: forzar tamaño */
+  .chart-wrap {
+    overflow: visible !important;
+    height: 500px !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .chart-canvas-wrap { height: 460px !important; }
+  canvas { max-height: 460px !important; }
+  
+  /* Ocultar video y overlay (race) */
+  #bgVideo, .overlay { display: none !important; }
+  
+  @page {
+    size: A4 landscape;
+    margin: 10mm 12mm;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="shell">
@@ -156,10 +259,8 @@ function onYearChange(){
 
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const allRows = IDX[p] ? Object.values(IDX[p]) : [];
-  const totalSistema = allRows.reduce((sum, d) => sum + (d.activos_net || 0), 0);
-  const allSorted = [...allRows].sort((a,b) => b.activos_net - a.activos_net);
-  const sorted = allSorted.slice(0, 20);
+  const sorted=(IDX[p]?Object.values(IDX[p]):[]).sort((a,b)=>b.activos_net-a.activos_net).slice(0,20);
+  const allRows = IDX[p] ? Object.values(IDX[p]) : [];const totalSistema = allRows.reduce((sum, d) => sum + (d.activos_net || 0),0);
   if(!sorted.length) return;
   const max=sorted[0].activos_net;
   // Buscar CAYCSOL en TODOS los datos, no solo el top 20
@@ -199,5 +300,171 @@ function render(){
   document.getElementById('rows').innerHTML=html;
 }
 </script>
+
+<script id="export-script">
+(function(){
+  // Lista de todas las páginas del dashboard
+  const ALL_PAGES = [
+    'afiliados.html',
+    'activos.html',
+    'cartera.html',
+    'pasivos.html',
+    'aportaciones.html',
+    'ingresos.html',
+    'egresos.html',
+    'excedentes.html',
+    'carrera.html',
+    'caycsol_afiliados.html'
+  ];
+
+  function getCurrentPage() {
+    return window.location.pathname.split('/').pop() || 'index.html';
+  }
+
+  function injectButtons() {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar || document.getElementById('btn-export-single')) return;
+
+    // Botón exportar esta página
+    const btnSingle = document.createElement('button');
+    btnSingle.id = 'btn-export-single';
+    btnSingle.className = 'btn-export';
+    btnSingle.innerHTML = '⬇ PDF esta página';
+    btnSingle.title = 'Exportar esta vista como PDF';
+    btnSingle.addEventListener('click', () => {
+      // Expandir tabla antes de imprimir
+      const wrap = document.querySelector('.tbl-wrap');
+      if (wrap) {
+        wrap.style.overflow = 'visible';
+        wrap.style.maxHeight = 'none';
+        wrap.style.height = 'auto';
+      }
+      setTimeout(() => window.print(), 150);
+    });
+
+    // Botón exportar todo (abre ventana con todas las páginas en iframe)
+    const btnAll = document.createElement('button');
+    btnAll.id = 'btn-export-all';
+    btnAll.className = 'btn-export btn-export-all';
+    btnAll.innerHTML = '📄 PDF completo';
+    btnAll.title = 'Exportar todo el dashboard como PDF';
+    btnAll.addEventListener('click', exportAll);
+
+    topbar.appendChild(btnSingle);
+    topbar.appendChild(btnAll);
+  }
+
+  function exportAll() {
+    const baseUrl = window.location.href.replace(/[^/]*$/, '');
+    
+    // Crear ventana con todas las páginas en iframes apilados
+    const w = window.open('', '_blank', 'width=1200,height=800');
+    if (!w) { alert('Permite ventanas emergentes para exportar el PDF completo.'); return; }
+
+    const pages = ALL_PAGES.map(p => baseUrl + p);
+
+    w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ranking Cooperativo Honduras — Completo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f2f5; font-family: Arial, sans-serif; }
+  .cover {
+    width: 100%; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a6b4a, #1d4ed8);
+    color: white; text-align: center;
+    page-break-after: always; break-after: page;
+  }
+  .cover h1 { font-size: 42px; font-weight: 900; margin-bottom: 12px; }
+  .cover p { font-size: 16px; opacity: .85; margin-bottom: 6px; }
+  .frame-page {
+    width: 100%; height: 100vh;
+    page-break-after: always; break-after: page;
+    overflow: hidden; position: relative;
+  }
+  iframe {
+    width: 100%; height: 100%;
+    border: none;
+    transform-origin: top left;
+  }
+  #print-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #1a6b4a; color: white; border: none;
+    padding: 12px 24px; border-radius: 8px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+  #status {
+    position: fixed; bottom: 24px; left: 24px; z-index: 9999;
+    background: white; border: 1px solid #dde1ea;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; color: #374151;
+  }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    #print-btn, #status { display: none !important; }
+    iframe { pointer-events: none; }
+    @page { size: A4 landscape; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>🏦 Ranking Cooperativo Honduras</h1>
+  <p>Superintendencia de Cooperativas — CONSUCOOP</p>
+  <p style="opacity:.6;font-size:13px;margin-top:16px">📊 Data Analyst @Ronfilander</p>
+  <p style="opacity:.5;font-size:12px;margin-top:8px">Generado: ${new Date().toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'})}</p>
+</div>
+${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame${i}" onload="frameLoaded(${i})"></iframe></div>`).join('\n')}
+<div id="status">Cargando páginas... (0/${pages.length})</div>
+<button id="print-btn" onclick="window.print()" style="display:none">🖨 Imprimir / Guardar PDF</button>
+<script>
+  let loaded = 0;
+  const total = ${pages.length};
+  function frameLoaded(i) {
+    loaded++;
+    document.getElementById('status').textContent = 'Cargando... (' + loaded + '/' + total + ')';
+    if (loaded === total) {
+      // Esperar que los datos carguen desde GitHub
+      setTimeout(() => {
+        document.getElementById('status').textContent = '✓ Listo para imprimir';
+        document.getElementById('print-btn').style.display = 'block';
+      }, 4000);
+    }
+  }
+  // Escalar iframes para que entren en una página A4
+  function scaleFrames() {
+    const frames = document.querySelectorAll('iframe');
+    frames.forEach(f => {
+      const container = f.parentElement;
+      const scaleX = container.offsetWidth / 1400;
+      const scaleY = container.offsetHeight / 900;
+      const scale = Math.min(scaleX, scaleY);
+      f.style.width = '1400px';
+      f.style.height = '900px';
+      f.style.transform = 'scale(' + scale + ')';
+    });
+  }
+  scaleFrames();
+  window.addEventListener('resize', scaleFrames);
+<\/script>
+</body>
+</html>`);
+    w.document.close();
+  }
+
+  // Inyectar cuando el DOM esté listo
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectButtons);
+  } else {
+    injectButtons();
+  }
+})();
+</script>
+
 </body>
 </html>
