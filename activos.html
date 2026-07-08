@@ -209,7 +209,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <div class="kpis">
     <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Posición</div><div class="kpi-val" id="kpiRank">—</div><div class="kpi-sub" id="kpiSub">—</div></div>
     <div class="kpi"><div class="kpi-lbl">Activos CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
-    <div class="kpi"><div class="kpi-lbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
+    <div class="kpi"><div class="kpi-lbl" id="kpiGapLbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
     <div class="kpi"><div class="kpi-lbl">Total sistema</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub">Sistema Cooperativo</div></div>
   </div>
   <div class="tbl-wrap">
@@ -277,8 +277,21 @@ function render(){
     document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
     document.getElementById('kpiVal').textContent=fmt(cay.activos_net);
     
-    if(t10&&r>10){document.getElementById('kpiGap').textContent=fmt(t10.activos_net-cay.activos_net);document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;}
-    else{document.getElementById('kpiGap').textContent='Top 10';document.getElementById('kpiGapSub').textContent='Objetivo logrado 🎯';}
+    if(t10&&r>10){
+      document.getElementById('kpiGapLbl').textContent='Brecha al Top 10';
+      document.getElementById('kpiGap').textContent=fmt(t10.activos_net-cay.activos_net);
+      document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;
+    }else{
+      const below=allSorted[10];
+      document.getElementById('kpiGapLbl').textContent='Margen sobre Top 10';
+      if(below){
+        document.getElementById('kpiGap').textContent='+'+fmt(cay.activos_net-below.activos_net);
+        document.getElementById('kpiGapSub').textContent='Sobre #11: '+below.coop;
+      }else{
+        document.getElementById('kpiGap').textContent='Top 10';
+        document.getElementById('kpiGapSub').textContent='Objetivo logrado 🎯';
+      }
+    }
   }
   let html='';
   sorted.forEach((d,i)=>{
