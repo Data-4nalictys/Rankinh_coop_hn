@@ -23,51 +23,69 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .nav-sep{height:1px;background:var(--border);margin:8px 14px}
 .nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
 .main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.ph{padding:14px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
-.ph-title{font-size:20px;font-weight:900;color:var(--text)}.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.ph{padding:12px 20px 8px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.ph-title{font-size:18px;font-weight:900;color:var(--text)}.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 .sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
 .sel:focus{outline:none;border-color:var(--accent)}
 .sel-w{position:relative;display:inline-block}
 .sel-w::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:9px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 20px 10px;flex-shrink:0}
-@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;box-shadow:var(--sh)}
-.kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
-.kpi-val{font-size:20px;font-weight:900;color:var(--text);line-height:1}
-.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
-.kpi-cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f0fbf5,#eaf7f1)}
-.kpi-cay .kpi-val{color:var(--accent)}
-.legend{display:flex;align-items:center;gap:10px;padding:0 20px 10px;flex-shrink:0;flex-wrap:wrap}
+
+.sec-title{padding:8px 20px 4px;font-size:11px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;display:flex;align-items:center;gap:8px}
+.sec-title .n{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0}
+
+.ax-wrap{flex-shrink:0;max-height:200px;overflow-y:auto;padding:0 20px 8px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.ax-wrap::-webkit-scrollbar{width:4px}
+.ax-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+.ax-th,.ax-tr{display:grid;grid-template-columns:26px 200px 1fr 92px;gap:8px;align-items:center;padding:2px 6px}
+.ax-th{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:2px;position:sticky;top:0;background:var(--bg)}
+.ax-tr{border-radius:6px}
+.ax-tr:hover{background:var(--surface)}
+.ax-tr.cay{background:var(--accent-light)}
+.ax-rn{font-size:12px;font-weight:900;color:var(--muted);text-align:center}
+.ax-rn.gold{color:#d97706}.ax-rn.silver{color:#94a3b8}.ax-rn.bronze{color:#b45309}
+.ax-cn{font-size:11px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ax-cn.cay{color:var(--accent)}
+.ax-bt{height:15px;background:var(--surface2);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.ax-bf{height:100%;background:linear-gradient(90deg,#1e40af,#3b82f6);border-radius:4px;transition:width .4s ease}
+.ax-val{font-size:10px;font-weight:800;color:var(--text2);text-align:right}
+
+.tbl-wrap{flex:1;overflow:auto;padding:0 20px 14px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.tbl-wrap::-webkit-scrollbar{height:8px;width:6px}
+.tbl-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+
+.th-group,.th-leaf,.tr{display:grid;grid-template-columns:30px 188px 88px repeat(15,58px);gap:4px;align-items:center;min-width:1260px}
+.th-group{padding:0 6px;font-size:8px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.th-group>div{text-align:center;padding-bottom:3px;border-bottom:2px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.th-leaf{padding:2px 6px 6px;font-size:8px;font-weight:700;color:var(--muted)}
+.th-leaf>div{text-align:center;cursor:default}
+.th-leaf>div:nth-child(2){text-align:left}
+.code{display:block;font-size:9px;font-weight:900;color:var(--text2)}
+
+.tr{padding:4px 6px;border-radius:7px;border:1px solid transparent;transition:.1s}
+.tr:hover{background:var(--surface);box-shadow:var(--sh);border-color:var(--border)}
+.tr.caycsol-row{background:var(--accent-light);border-color:#a7d9c0}
+.rn{font-size:15px;font-weight:900;text-align:center;color:var(--muted)}
+.rn.gold{color:#d97706}.rn.silver{color:#94a3b8}.rn.bronze{color:#b45309}
+.cn{font-size:11px;font-weight:700;color:var(--text);padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cn.cay{color:var(--accent)}
+.axv{font-size:10px;font-weight:700;color:var(--text2);text-align:right;padding-right:4px}
+
+.ring-wrap{display:flex;align-items:center;justify-content:center}
+.ring{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--rc,#9ca3af) calc(var(--pct,0)*1%), var(--surface2) 0)}
+.ring-inner{position:absolute;inset:6px;background:var(--surface);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ring-val{font-size:8.5px;font-weight:900;color:var(--text)}
+.ring-grade{font-size:7.5px;font-weight:900;margin-top:1px}
+.ring.na{background:var(--surface2);border:2px dashed var(--border)}
+.ring.na .ring-inner{background:transparent;inset:0}
+.ring.na .ring-val{font-size:8px;color:var(--muted);font-weight:800}
+
+.legend{display:flex;align-items:center;gap:10px;padding:0 20px 8px;flex-shrink:0;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text2)}
 .legend-dot{width:14px;height:14px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff}
 .legend-dot.a{background:#00A651}.legend-dot.b{background:#92D050;color:#3a5c14}.legend-dot.c{background:#FFEB0B;color:#7a6a00}.legend-dot.d{background:#F2A20C}.legend-dot.e{background:#FF0000}
-.tbl-wrap{flex:1;overflow-y:auto;overflow-x:auto;padding:0 20px 14px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
-.tbl-wrap::-webkit-scrollbar{height:6px;width:4px}
-.tbl-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
-.th,.tr{display:grid;grid-template-columns:32px 180px repeat(7,1fr);gap:4px;align-items:center;min-width:960px}
-.th-meta{font-size:8px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;display:block;margin-top:1px}
-.th{padding:0 6px 6px;border-bottom:2px solid var(--border);margin-bottom:2px;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.th>div,.tr>div{text-align:center}
-.th>div:nth-child(2),.tr>div:nth-child(2){text-align:left}
-.th-sort{cursor:pointer;user-select:none}
-.th-sort:hover{color:var(--text)}
-.th-sort.active{color:var(--accent)}
-.tr{padding:5px 6px;border-radius:7px;border:1px solid transparent;transition:.1s}
-.tr:hover{background:var(--surface);box-shadow:var(--sh);border-color:var(--border)}
-.tr.caycsol-row{background:var(--accent-light);border-color:#a7d9c0}
-.rn{font-size:17px;font-weight:900;text-align:center;color:var(--muted)}
-.rn.gold{color:#d97706}.rn.silver{color:#94a3b8}.rn.bronze{color:#b45309}
-.cn{font-size:12px;font-weight:700;color:var(--text);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cn.cay{color:var(--accent)}
-.badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:66px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap}
-.badge .g{font-size:9px;font-weight:900;opacity:.85}
-.badge.a{background:#00A651;color:#fff}
-.badge.b{background:#92D050;color:#3a5c14}
-.badge.c{background:#FFEB0B;color:#7a6a00}
-.badge.d{background:#F2A20C;color:#fff}
-.badge.e{background:#FF0000;color:#fff}
-.badge.na{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
+.legend-dot.na{background:var(--surface2);border:2px dashed var(--border);color:var(--muted)}
+
 .loading{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:12px;color:var(--muted)}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -76,7 +94,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </style>
 
 <style id="print-styles">
-/* ══ BOTÓN EXPORTAR ══ */
 .btn-export {
   display: flex; align-items: center; gap: 6px;
   background: #1a6b4a; color: #fff;
@@ -92,7 +109,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 }
 .btn-export-all:hover { background: #1e3a8a; }
 
-/* ══ PRINT MEDIA ══ */
 @media print {
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   html, body { height: auto !important; overflow: visible !important; background: #f0f2f5 !important; }
@@ -102,7 +118,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   .btn-export, .controls, .sel-w, .sel { display: none !important; }
   .main { overflow: visible !important; display: block !important; width: 100% !important; min-width: 0 !important; }
   .ph { page-break-after: avoid; break-after: avoid; }
-  .kpis { display: grid !important; page-break-inside: avoid; break-inside: avoid; padding: 0 20px 10px !important; }
+  .ax-wrap { overflow: visible !important; max-height: none !important; }
   .tbl-wrap { overflow: visible !important; flex: unset !important; height: auto !important; max-height: none !important; padding: 0 20px 14px !important; }
   .tr { animation: none !important; page-break-inside: avoid; break-inside: avoid; }
   .period-pill { display: block !important; }
@@ -145,40 +161,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 cooperativas · metas según parámetros CONSUCOOP</div></div>
+    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Sistema completo CONSUCOOP · 15 indicadores oficiales</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
     </div>
   </div>
-  <div class="kpis">
-    <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Solvencia</div><div class="kpi-val" id="kpiSolv">—</div><div class="kpi-sub" id="kpiSolvSub">Meta CONSUCOOP: ≥8.5%</div></div>
-    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Morosidad</div><div class="kpi-val" id="kpiMora">—</div><div class="kpi-sub">Meta CONSUCOOP: ≤5%</div></div>
-    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Liquidez</div><div class="kpi-val" id="kpiLiq">—</div><div class="kpi-sub">Meta CONSUCOOP: ≥9%</div></div>
-    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Autosuficiencia</div><div class="kpi-val" id="kpiAuto">—</div><div class="kpi-sub">Meta CONSUCOOP: ≥110%</div></div>
+
+  <div class="sec-title">Top 20 <span class="n">· Activos Netos</span></div>
+  <div class="ax-wrap">
+    <div class="ax-th"><div>#</div><div>Cooperativa</div><div>Activos Netos</div><div style="text-align:right">Valor</div></div>
+    <div id="axRows"></div>
   </div>
+
+  <div class="sec-title">Indicadores <span class="n">· CONSUCOOP</span></div>
   <div class="legend">
     <div class="legend-item"><span class="legend-dot a">A</span>Óptimo</div>
     <div class="legend-item"><span class="legend-dot b">B</span>Aceptable</div>
     <div class="legend-item"><span class="legend-dot c">C</span>Regular</div>
     <div class="legend-item"><span class="legend-dot d">D</span>Deficiente</div>
     <div class="legend-item"><span class="legend-dot e">E</span>Crítico</div>
-    <div class="legend-item" style="color:var(--muted)">Clic en un encabezado para ordenar</div>
-  </div>
-  <div class="legend" style="padding-top:0">
-    <div class="legend-item" style="color:var(--muted);font-weight:400">* El Excel de CONSUCOOP solo trae el corte de la meta (cumple/no cumple), no las 4 bandas A-E intermedias — esas las estimé de forma proporcional alrededor de cada meta. Si tienes la tabla oficial de rangos por letra, la puedo usar para afinar esto al 100%. Solvencia, Liquidez y ROA también son aproximaciones a la fórmula oficial (no distinguen moneda, promedio de saldos, ni activos improductivos); límites por deudor/grupo familiar, provisión en moneda extranjera y corto plazo no se calculan aquí por falta de detalle en la fuente.</div>
+    <div class="legend-item"><span class="legend-dot na">N/D</span>Sin datos suficientes en la fuente</div>
   </div>
   <div class="tbl-wrap">
-    <div class="th">
-      <div>#</div><div>Cooperativa</div>
-      <div class="th-sort" data-k="solvencia">Solvencia<span class="th-meta">Meta ≥8.5%</span></div>
-      <div class="th-sort" data-k="morosidad">Morosidad<span class="th-meta">Meta ≤5%</span></div>
-      <div class="th-sort" data-k="cobertura">Cobertura Mora<span class="th-meta">Meta ≥100%</span></div>
-      <div class="th-sort" data-k="liquidez">Liquidez<span class="th-meta">Meta ≥9%</span></div>
-      <div class="th-sort" data-k="roa">ROA<span class="th-meta">Meta ≥0.50%</span></div>
-      <div class="th-sort" data-k="roe">ROE<span class="th-meta">Referencial</span></div>
-      <div class="th-sort" data-k="autosuficiencia">Autosuf. Op.<span class="th-meta">Meta ≥110%</span></div>
-    </div>
+    <div class="th-group" id="thGroup"></div>
+    <div class="th-leaf" id="thLeaf"></div>
     <div id="rows"><div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div></div>
   </div>
 </main>
@@ -189,58 +196,104 @@ const MESES={1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Jul
 const selYear=document.getElementById('selYear');
 const selMonth=document.getElementById('selMonth');
 
-// dirección "buena" de cada indicador: desc = más alto es mejor, asc = más bajo es mejor
-const SORT_DIR={solvencia:'desc',morosidad:'asc',cobertura:'desc',liquidez:'desc',roe:'desc',roa:'desc',autosuficiencia:'desc'};
-let sortKey='solvencia';
+const GRADE_COLOR={a:'#00A651',b:'#92D050',c:'#FFEB0B',d:'#F2A20C',e:'#FF0000'};
 
-// semáforo por indicador — metas oficiales CONSUCOOP (parámetros del Excel compartido)
-// solvencia      ~ 3.1 Índice de Capital Institucional        → meta ≥8.5%
-// morosidad      = 2.2 Índice de Morosidad                    → meta ≤5%
-// cobertura      = 2.1 Suficiencia de Provisión para Cartera  → meta ≥100%
-// liquidez       ~ 4.1 Cobertura oblig. depositarias (M.N.)   → meta ≥9%
-// roa            ~ 6.1 Rentabilidad s/ Activos Netos Promedio → meta ≥0.50%
-// autosuficiencia= 5.1 Autosuficiencia Operativa              → meta ≥110%
-// roe            → sin parámetro oficial en la lista CONSUCOOP; se deja como referencia de mercado
-//
-// El Excel solo trae el corte final (cumple / no cumple la meta). Las 4 bandas A-E
-// intermedias se estiman proporcionalmente alrededor de esa meta (ver nota en la página).
-const META={solvencia:8.5,morosidad:5,cobertura:100,liquidez:9,roe:10,roa:0.5,autosuficiencia:110};
+// Los 15 indicadores oficiales de CONSUCOOP (Excel compartido), agrupados en las
+// 6 categorías originales. "computable:false" = no se puede calcular con los
+// datos que trae Balance_General.csv / Estado_de_Resultados.csv (piden detalle
+// por deudor individual, por grupo familiar, o por moneda, que la fuente no trae
+// desglosado). Ahí se muestra N/D en vez de inventar un número.
+const INDICATORS=[
+  {code:'1.1',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',computable:false,group:1},
+  {code:'1.2',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',computable:false,group:1},
+  {code:'1.3',name:'Créditos a Desarrolladores de Vivienda',metaLabel:'≤10% grupo / 5% c/u',computable:false,group:1},
+  {code:'2.1',key:'cobertura',name:'Suficiencia de Provisión para Cartera',metaLabel:'≥100%',meta:100,dir:'desc',computable:true,group:2},
+  {code:'2.2',key:'morosidad',name:'Índice de Morosidad',metaLabel:'≤5%',meta:5,dir:'asc',computable:true,group:2},
+  {code:'2.3',key:'activos_improd',name:'Activos Improductivos',metaLabel:'≤15%',meta:15,dir:'asc',computable:true,group:2},
+  {code:'3.1',key:'capital_inst',name:'Índice de Capital Institucional',metaLabel:'≥8.5%',meta:8.5,dir:'desc',computable:true,group:3},
+  {code:'3.2',key:'patrim_comprometido',name:'Patrimonio Comprometido por Mora >30d',metaLabel:'<80%',meta:80,dir:'asc',computable:true,group:3},
+  {code:'3.3',name:'Índice de Capital Institucional Ajustado',metaLabel:'≥10%',computable:false,group:3},
+  {code:'4.1',key:'cobertura_dep_mn',name:'Cobertura Depósitos Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',computable:true,group:4},
+  {code:'4.2',name:'Cobertura Depósitos Moneda Extranjera',metaLabel:'≥24%',computable:false,group:4},
+  {code:'4.3',name:'Cobertura de Obligaciones de Corto Plazo',metaLabel:'≥110%',computable:false,group:4},
+  {code:'5.1',key:'autosuficiencia',name:'Autosuficiencia Operativa',metaLabel:'≥110%',meta:110,dir:'desc',computable:true,group:5},
+  {code:'5.2',key:'eficiencia_activos',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',computable:true,group:5},
+  {code:'6.1',key:'roa',name:'Rentabilidad sobre Activos Netos Promedio',metaLabel:'≥0.50%',meta:0.5,dir:'desc',computable:true,group:6},
+];
+const GROUPS=[
+  {n:1,name:'1. Límites de Riesgo'},
+  {n:2,name:'2. Calidad de Activos'},
+  {n:3,name:'3. Solvencia'},
+  {n:4,name:'4. Liquidez'},
+  {n:5,name:'5. Gestión Administrativa'},
+  {n:6,name:'6. Rendimientos y Costos'},
+];
 
-function gradeOf(k,v){
-  if(v===null||isNaN(v))return 'na';
-  const meta=META[k];
-  if(meta===undefined)return 'na';
-  if(SORT_DIR[k]==='desc'){
-    const ratio=v/meta;
-    if(ratio>=1.3)return 'a';
-    if(ratio>=1.0)return 'b';
-    if(ratio>=0.85)return 'c';
-    if(ratio>=0.6)return 'd';
-    return 'e';
+function buildHeaders(){
+  let g='<div></div><div></div><div></div>';
+  GROUPS.forEach(gr=>{
+    const span=INDICATORS.filter(i=>i.group===gr.n).length;
+    g+=`<div style="grid-column:span ${span}">${gr.name}</div>`;
+  });
+  document.getElementById('thGroup').innerHTML=g;
+
+  let l='<div>#</div><div style="text-align:left">Cooperativa</div><div>Activos Netos</div>';
+  INDICATORS.forEach(it=>{
+    l+=`<div title="${it.name} — Meta ${it.metaLabel}"><span class="code">${it.code}</span>${it.metaLabel}</div>`;
+  });
+  document.getElementById('thLeaf').innerHTML=l;
+}
+buildHeaders();
+
+function gradeOf(meta,dir,v){
+  if(dir==='desc'){
+    const r=v/meta;
+    if(r>=1.3)return 'a'; if(r>=1.0)return 'b'; if(r>=0.85)return 'c'; if(r>=0.6)return 'd'; return 'e';
   }else{
-    if(v<=meta*0.5)return 'a';
-    if(v<=meta)return 'b';
-    if(v<=meta*1.4)return 'c';
-    if(v<=meta*2)return 'd';
-    return 'e';
+    if(v<=meta*0.5)return 'a'; if(v<=meta)return 'b'; if(v<=meta*1.4)return 'c'; if(v<=meta*2)return 'd'; return 'e';
   }
 }
-function badgeClass(k,v){ return gradeOf(k,v); }
-const GRADE_LBL={a:'A',b:'B',c:'C',d:'D',e:'E',na:''};
+function scoreOf(meta,dir,v){
+  let s;
+  if(dir==='desc'){ s=meta>0?(v/meta*100):0; }
+  else{ s=v>0?(meta/v*100):100; }
+  return Math.max(0,Math.min(100,s));
+}
 function fmtPct(v){
-  if(v===null||isNaN(v))return 'N/D';
+  if(v===null||v===undefined||isNaN(v))return 'N/D';
   return v.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
 }
-function badgeHTML(k,v){
-  const cls=badgeClass(k,v);
-  const lbl=GRADE_LBL[cls];
-  return `<span class="badge ${cls}">${fmtPct(v)}${lbl?`<span class="g">${lbl}</span>`:''}</span>`;
+function fmtM(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
+
+function ringHTML(item,value){
+  if(!item.computable || value===null || value===undefined || isNaN(value)){
+    const why=item.computable
+      ? 'sin datos suficientes en este periodo'
+      : 'no calculable: la fuente no trae el desglose que pide este indicador';
+    return `<div class="ring-wrap" title="${item.code} ${item.name} — ${why}">
+      <div class="ring na"><div class="ring-inner"><div class="ring-val">N/D</div></div></div>
+    </div>`;
+  }
+  const grade=gradeOf(item.meta,item.dir,value);
+  const pct=scoreOf(item.meta,item.dir,value);
+  const color=GRADE_COLOR[grade];
+  return `<div class="ring-wrap" title="${item.code} ${item.name} — Meta ${item.metaLabel} · Valor ${fmtPct(value)}">
+    <div class="ring" style="--pct:${pct};--rc:${color}">
+      <div class="ring-inner">
+        <div class="ring-val">${fmtPct(value)}</div>
+        <div class="ring-grade" style="color:${color}">${grade.toUpperCase()}</div>
+      </div>
+    </div>
+  </div>`;
 }
 
 let BAL=[],RES=[],PERIODOS=[],IDX_BAL={},IDX_RES={};
 
 Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,resRaw])=>{
-  BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones','disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos']);
+  BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones',
+    'disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos',
+    'aportaciones','activos_eventuales','cargos_diferidos','propiedad_planta_equipo','inversiones',
+    'depositos_ahorro','dpf']);
   RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm']);
   PERIODOS=RD.periodos(BAL);
   IDX_BAL=RD.buildIndex(BAL);
@@ -257,9 +310,6 @@ Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,r
   selMonth.value=parseInt(lm);
   selYear.addEventListener('change',onYearChange);
   selMonth.addEventListener('change',render);
-  document.querySelectorAll('.th-sort').forEach(el=>{
-    el.addEventListener('click',()=>{sortKey=el.dataset.k;render();});
-  });
   render();
 }).catch(e=>{document.getElementById('rows').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
 
@@ -271,18 +321,46 @@ function onYearChange(){
 }
 
 function calcIndicadores(b,r){
-  const carteraRiesgo=(b?.atrasados||0)+(b?.vencidos||0)+(b?.demanda_judicial||0);
-  const exigTotal=(b?.exig_inmediatas||0)+(b?.exig_depositos||0);
+  const carteraRiesgo=(b.atrasados||0)+(b.vencidos||0)+(b.demanda_judicial||0);
+  // si la cartera en riesgo suma exactamente 0 mientras SÍ hay préstamos activos,
+  // lo más probable es que el desglose de mora no venga reportado ese mes (pasa
+  // en periodos recientes), no que la cooperativa tenga 0% de mora real.
+  const moraReportada = !(carteraRiesgo===0 && b.prestamos>0);
+  const depMN=(b.depositos_ahorro||0)+(b.dpf||0);
+  const activosProductivos=(b.prestamos||0)+(b.inversiones||0);
+
   return {
     coop:b.coop,
-    solvencia: b.activos_tot>0 ? b.patrimonio/b.activos_tot*100 : null,
-    morosidad: b.prestamos>0 ? carteraRiesgo/b.prestamos*100 : null,
-    cobertura: carteraRiesgo>0 ? (b.provisiones||0)/carteraRiesgo*100 : null,
-    liquidez: exigTotal>0 ? (b.disponibilidades||0)/exigTotal*100 : null,
-    roe: b.patrimonio>0 && r ? r.excedentes/b.patrimonio*100 : null,
-    roa: b.activos_net>0 && r ? r.excedentes/b.activos_net*100 : null,
-    autosuficiencia: r && r.egresos>0 ? r.ingresos/r.egresos*100 : null,
+    activos_net:b.activos_net,
+    cobertura: (moraReportada && carteraRiesgo>0) ? (b.provisiones||0)/carteraRiesgo*100 : null,
+    morosidad: (moraReportada && b.prestamos>0) ? carteraRiesgo/b.prestamos*100 : null,
+    activos_improd: b.activos_tot>0 ? ((b.activos_eventuales||0)+(b.cargos_diferidos||0)+(b.propiedad_planta_equipo||0)+carteraRiesgo)/b.activos_tot*100 : null,
+    capital_inst: b.activos_tot>0 ? (b.patrimonio-(b.aportaciones||0))/b.activos_tot*100 : null,
+    patrim_comprometido: (moraReportada && b.patrimonio>0) ? Math.max(0,carteraRiesgo-(b.provisiones||0))/b.patrimonio*100 : null,
+    cobertura_dep_mn: depMN>0 ? (b.disponibilidades||0)/depMN*100 : null,
+    autosuficiencia: (r && r.egresos>0) ? r.ingresos/r.egresos*100 : null,
+    eficiencia_activos: (r && activosProductivos>0) ? r.gast_adm/activosProductivos*100 : null,
+    roa: (r && b.activos_net>0) ? r.excedentes/b.activos_net*100 : null,
   };
+}
+
+function renderTopActivos(balPeriodo){
+  const sorted=[...balPeriodo].sort((a,b)=>b.activos_net-a.activos_net).slice(0,20);
+  const max=sorted.length?sorted[0].activos_net:1;
+  let html='';
+  sorted.forEach((d,i)=>{
+    const r=i+1;
+    const isCay=d.coop.includes('CAYCSOL');
+    const rCls=r===1?'gold':r===2?'silver':r===3?'bronze':'';
+    const pct=Math.max(d.activos_net/max*100,1);
+    html+=`<div class="ax-tr${isCay?' cay':''}">
+      <div class="ax-rn ${rCls}">${r}</div>
+      <div class="ax-cn${isCay?' cay':''}">${d.coop}</div>
+      <div class="ax-bt"><div class="ax-bf" style="width:${pct}%"></div></div>
+      <div class="ax-val">${fmtM(d.activos_net)}</div>
+    </div>`;
+  });
+  document.getElementById('axRows').innerHTML=html;
 }
 
 function render(){
@@ -291,45 +369,29 @@ function render(){
   const resPeriodo = IDX_RES[p] || {};
   if(!balPeriodo.length) return;
 
-  const all = balPeriodo.map(b=>calcIndicadores(b, resPeriodo[b.coop]));
-
-  document.querySelectorAll('.th-sort').forEach(el=>el.classList.toggle('active',el.dataset.k===sortKey));
-
-  const dir=SORT_DIR[sortKey];
-  const sortable=all.filter(d=>d[sortKey]!==null);
-  const naGroup=all.filter(d=>d[sortKey]===null);
-  sortable.sort((a,b)=> dir==='desc' ? b[sortKey]-a[sortKey] : a[sortKey]-b[sortKey]);
-  const allSorted=[...sortable,...naGroup];
-  const sorted=allSorted.slice(0,20);
-
-  const cay=allSorted.find(d=>d.coop.includes('CAYCSOL'));
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
 
-  if(cay){
-    document.getElementById('kpiSolv').textContent=fmtPct(cay.solvencia);
-    document.getElementById('kpiMora').textContent=fmtPct(cay.morosidad);
-    document.getElementById('kpiLiq').textContent=fmtPct(cay.liquidez);
-    document.getElementById('kpiAuto').textContent=fmtPct(cay.autosuficiencia);
-    const r=allSorted.indexOf(cay)+1;
-    document.getElementById('kpiSolvSub').textContent='Posición #'+r+' en '+sortKey+' · Meta ≥8.5%';
-  }
+  renderTopActivos(balPeriodo);
+
+  const allSorted=[...balPeriodo].sort((a,b)=>b.activos_net-a.activos_net);
+  const sorted=allSorted.slice(0,20);
 
   let html='';
-  sorted.forEach((d,i)=>{
+  sorted.forEach((b,i)=>{
     const r=i+1;
-    const isCay=d.coop.includes('CAYCSOL');
+    const d=calcIndicadores(b, resPeriodo[b.coop]);
+    const isCay=b.coop.includes('CAYCSOL');
     const rCls=r===1?'gold':r===2?'silver':r===3?'bronze':'';
+    let cells='';
+    INDICATORS.forEach(it=>{
+      cells+=`<div>${ringHTML(it, it.key?d[it.key]:null)}</div>`;
+    });
     html+=`<div class="tr${isCay?' caycsol-row':''}">
       <div class="rn ${rCls}">${r}</div>
-      <div class="cn${isCay?' cay':''}">${d.coop}</div>
-      <div>${badgeHTML('solvencia',d.solvencia)}</div>
-      <div>${badgeHTML('morosidad',d.morosidad)}</div>
-      <div>${badgeHTML('cobertura',d.cobertura)}</div>
-      <div>${badgeHTML('liquidez',d.liquidez)}</div>
-      <div>${badgeHTML('roa',d.roa)}</div>
-      <div>${badgeHTML('roe',d.roe)}</div>
-      <div>${badgeHTML('autosuficiencia',d.autosuficiencia)}</div>
+      <div class="cn${isCay?' cay':''}">${b.coop}</div>
+      <div class="axv">${fmtM(b.activos_net)}</div>
+      ${cells}
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;

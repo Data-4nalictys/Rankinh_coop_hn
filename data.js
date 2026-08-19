@@ -229,6 +229,27 @@ async function loadBalanceGeneral() {
 
       exig_depositos:
         toNum(r['EXIGIBILIDADES X DEPOSITOS']),
+
+      aportaciones:
+        toNum(r['Aportaciones']),
+
+      activos_eventuales:
+        toNum(r['ACTIVOS EVENTUALES']),
+
+      cargos_diferidos:
+        toNum(r['CARGOS DIFERIDOS']),
+
+      propiedad_planta_equipo:
+        toNum(r['PROPIEDAD, PLANTA, EQUIPO']) + toNum(r['PROPIEDAD PLANTA EQUIPO']),
+
+      inversiones:
+        toNum(r['INVERSIONES']),
+
+      depositos_ahorro:
+        toNum(r['Depositos Ahorro hn']),
+
+      dpf:
+        toNum(r['DPF hn']),
     }));
 }
 
