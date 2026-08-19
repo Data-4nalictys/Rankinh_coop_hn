@@ -233,6 +233,9 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <a class="nav-a" href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
   <a class="nav-a" href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
   <div class="nav-sep"></div>
+  <div class="nav-sec">Indicadores</div>
+  <a class="nav-a " href="indicadores.html"><span class="nav-icon">🧮</span>Indicadores Financieros</a>
+  <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
   <a class="nav-a " href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
   <a class="nav-a active" href="crecimiento.html"><span class="nav-icon">📊</span>Crecimiento</a>
@@ -689,6 +692,7 @@ Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw])
     'ingresos.html',
     'egresos.html',
     'excedentes.html',
+    'indicadores.html',
     'carrera.html',
     'caycsol_afiliados.html'
   ];

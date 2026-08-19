@@ -211,6 +211,24 @@ async function loadBalanceGeneral() {
 
       provisiones:
         toNum(r['PROVISIONES DE VALUACION']),
+
+      disponibilidades:
+        toNum(r['DISPONIBILIDADES']),
+
+      atrasados:
+        toNum(r['Atrasados hn']),
+
+      vencidos:
+        toNum(r['Vencidos hn']),
+
+      demanda_judicial:
+        toNum(r['Demanda Judicial hn']),
+
+      exig_inmediatas:
+        toNum(r['EXIGIBILIDADES INMEDIATAS']),
+
+      exig_depositos:
+        toNum(r['EXIGIBILIDADES X DEPOSITOS']),
     }));
 }
 

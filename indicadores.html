@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranking HN — Ranking de Aportaciones</title>
+<title>Ranking HN — Indicadores Financieros</title>
 <style>
 :root{--bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;--accent:#1a6b4a;--accent-light:#eaf7f1;--text:#111827;--text2:#6b7280;--muted:#9ca3af;--sh:0 1px 3px rgba(0,0,0,.06)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -38,27 +38,36 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .kpi-sub{font-size:10px;color:var(--muted);margin-top:3px}
 .kpi-cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f0fbf5,#eaf7f1)}
 .kpi-cay .kpi-val{color:var(--accent)}
-.tbl-wrap{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 20px 14px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
-.tbl-wrap::-webkit-scrollbar{width:4px}
+.legend{display:flex;align-items:center;gap:10px;padding:0 20px 10px;flex-shrink:0;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text2)}
+.legend-dot{width:14px;height:14px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff}
+.legend-dot.a{background:#00A651}.legend-dot.b{background:#92D050;color:#3a5c14}.legend-dot.c{background:#FFEB0B;color:#7a6a00}.legend-dot.d{background:#F2A20C}.legend-dot.e{background:#FF0000}
+.tbl-wrap{flex:1;overflow-y:auto;overflow-x:auto;padding:0 20px 14px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.tbl-wrap::-webkit-scrollbar{height:6px;width:4px}
 .tbl-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
-.th,.tr{display:grid;grid-template-columns:36px 200px 1fr 110px 110px;align-items:center;min-width:0}
-@media(max-width:900px){.th,.tr{grid-template-columns:30px 150px 1fr 90px 90px}}
-@media(max-width:600px){.th,.tr{grid-template-columns:26px 1fr 110px 80px 80px}}
-.th{padding:0 6px 6px;border-bottom:2px solid var(--border);margin-bottom:2px;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-.tr{padding:4px 6px;border-radius:7px;border:1px solid transparent;transition:.1s}
+.th,.tr{display:grid;grid-template-columns:32px 180px repeat(7,1fr);gap:4px;align-items:center;min-width:960px}
+.th-meta{font-size:8px;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;display:block;margin-top:1px}
+.th{padding:0 6px 6px;border-bottom:2px solid var(--border);margin-bottom:2px;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.th>div,.tr>div{text-align:center}
+.th>div:nth-child(2),.tr>div:nth-child(2){text-align:left}
+.th-sort{cursor:pointer;user-select:none}
+.th-sort:hover{color:var(--text)}
+.th-sort.active{color:var(--accent)}
+.tr{padding:5px 6px;border-radius:7px;border:1px solid transparent;transition:.1s}
 .tr:hover{background:var(--surface);box-shadow:var(--sh);border-color:var(--border)}
 .tr.caycsol-row{background:var(--accent-light);border-color:#a7d9c0}
 .rn{font-size:17px;font-weight:900;text-align:center;color:var(--muted)}
 .rn.gold{color:#d97706}.rn.silver{color:#94a3b8}.rn.bronze{color:#b45309}
 .cn{font-size:12px;font-weight:700;color:var(--text);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cn.cay{color:var(--accent)}
-.bc{padding-right:8px;min-width:0}
-.bt{width:100%;height:20px;background:var(--surface2);border-radius:5px;overflow:hidden;border:1px solid var(--border);position:relative}
-.bf{height:100%;border-radius:5px;display:flex;align-items:center;justify-content:flex-start;padding-left:8px;font-size:10px;font-weight:700;color:#fff;transition:width .55s cubic-bezier(.4,0,.2,1);min-width:0;white-space:nowrap;overflow:hidden}
-.bv-out{position:absolute;top:0;height:100%;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:700;color:var(--text2);pointer-events:none}
-.c1{background:linear-gradient(90deg,#1e40af,#3b82f6)}.c2{background:linear-gradient(90deg,#1e3a8a,#2563eb)}.c3{background:linear-gradient(90deg,#1e3a8a,#1d4ed8)}.cn_{background:linear-gradient(90deg,#6b7280,#9ca3af)}.cc{background:linear-gradient(90deg,#065f46,#16a34a)}
-.vc{font-size:11px;font-weight:700;color:var(--text2);text-align:right;padding:0 4px}
-.vc.pos{color:#16a34a}.vc.neg{color:#dc2626}
+.badge{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:66px;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:800;white-space:nowrap}
+.badge .g{font-size:9px;font-weight:900;opacity:.85}
+.badge.a{background:#00A651;color:#fff}
+.badge.b{background:#92D050;color:#3a5c14}
+.badge.c{background:#FFEB0B;color:#7a6a00}
+.badge.d{background:#F2A20C;color:#fff}
+.badge.e{background:#FF0000;color:#fff}
+.badge.na{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
 .loading{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:12px;color:var(--muted)}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -85,86 +94,19 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 
 /* ══ PRINT MEDIA ══ */
 @media print {
-  /* Reset */
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  
-  html, body {
-    height: auto !important;
-    overflow: visible !important;
-    background: #f0f2f5 !important;
-  }
-  
-  /* Layout: ocultar sidebar, full width */
-  .shell {
-    display: block !important;
-    height: auto !important;
-  }
+  html, body { height: auto !important; overflow: visible !important; background: #f0f2f5 !important; }
+  .shell { display: block !important; height: auto !important; }
   .sidebar { display: none !important; }
-  .topbar {
-    display: flex !important;
-    position: relative !important;
-    grid-column: unset !important;
-    page-break-after: avoid;
-    break-after: avoid;
-  }
-  
-  /* Ocultar controles de UI */
+  .topbar { display: flex !important; position: relative !important; grid-column: unset !important; page-break-after: avoid; break-after: avoid; }
   .btn-export, .controls, .sel-w, .sel { display: none !important; }
-  
-  /* Main: mostrar todo */
-  .main {
-    overflow: visible !important;
-    display: block !important;
-    width: 100% !important;
-    min-width: 0 !important;
-  }
-  
+  .main { overflow: visible !important; display: block !important; width: 100% !important; min-width: 0 !important; }
   .ph { page-break-after: avoid; break-after: avoid; }
-  
-  /* KPIs sin corte */
-  .kpis {
-    display: grid !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-    padding: 0 20px 10px !important;
-  }
-  
-  /* Tabla: mostrar TODO el scroll */
-  .tbl-wrap {
-    overflow: visible !important;
-    flex: unset !important;
-    height: auto !important;
-    max-height: none !important;
-    padding: 0 20px 14px !important;
-  }
-  
-  /* Filas: sin animación, sin corte */
-  .tr {
-    animation: none !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  
-  /* Período visible en header */
+  .kpis { display: grid !important; page-break-inside: avoid; break-inside: avoid; padding: 0 20px 10px !important; }
+  .tbl-wrap { overflow: visible !important; flex: unset !important; height: auto !important; max-height: none !important; padding: 0 20px 14px !important; }
+  .tr { animation: none !important; page-break-inside: avoid; break-inside: avoid; }
   .period-pill { display: block !important; }
-  
-  /* Chart canvas: forzar tamaño */
-  .chart-wrap {
-    overflow: visible !important;
-    height: 500px !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  .chart-canvas-wrap { height: 460px !important; }
-  canvas { max-height: 460px !important; }
-  
-  /* Ocultar video y overlay (race) */
-  #bgVideo, .overlay { display: none !important; }
-  
-  @page {
-    size: A4 landscape;
-    margin: 10mm 12mm;
-  }
+  @page { size: A4 landscape; margin: 10mm 12mm; }
 }
 </style>
 
@@ -184,14 +126,14 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <a class="nav-a " href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
   <a class="nav-a " href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
   <a class="nav-a " href="pasivos.html"><span class="nav-icon">📊</span>Exigibilidades</a>
-  <a class="nav-a active" href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
+  <a class="nav-a " href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
   <div class="nav-sec">Resultados</div>
   <a class="nav-a " href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
   <a class="nav-a " href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
   <a class="nav-a " href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Indicadores</div>
-  <a class="nav-a " href="indicadores.html"><span class="nav-icon">🧮</span>Indicadores Financieros</a>
+  <a class="nav-a active" href="indicadores.html"><span class="nav-icon">🧮</span>Indicadores Financieros</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
   <a class="nav-a " href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
@@ -203,24 +145,39 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Ranking de Aportaciones</div><div class="ph-sub">Top 20 cooperativas · capital aportado por los socios</div></div>
+    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 cooperativas · metas según parámetros CONSUCOOP</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
     </div>
   </div>
   <div class="kpis">
-    <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Posición</div><div class="kpi-val" id="kpiRank">—</div><div class="kpi-sub" id="kpiSub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Aportaciones CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
-    <div class="kpi"><div class="kpi-lbl" id="kpiGapLbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
-    <div class="kpi"><div class="kpi-lbl">Total sistema</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub">Sistema Cooperativo</div></div>
+    <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Solvencia</div><div class="kpi-val" id="kpiSolv">—</div><div class="kpi-sub" id="kpiSolvSub">Meta CONSUCOOP: ≥8.5%</div></div>
+    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Morosidad</div><div class="kpi-val" id="kpiMora">—</div><div class="kpi-sub">Meta CONSUCOOP: ≤5%</div></div>
+    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Liquidez</div><div class="kpi-val" id="kpiLiq">—</div><div class="kpi-sub">Meta CONSUCOOP: ≥9%</div></div>
+    <div class="kpi"><div class="kpi-lbl">CAYCSOL — Autosuficiencia</div><div class="kpi-val" id="kpiAuto">—</div><div class="kpi-sub">Meta CONSUCOOP: ≥110%</div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot a">A</span>Óptimo</div>
+    <div class="legend-item"><span class="legend-dot b">B</span>Aceptable</div>
+    <div class="legend-item"><span class="legend-dot c">C</span>Regular</div>
+    <div class="legend-item"><span class="legend-dot d">D</span>Deficiente</div>
+    <div class="legend-item"><span class="legend-dot e">E</span>Crítico</div>
+    <div class="legend-item" style="color:var(--muted)">Clic en un encabezado para ordenar</div>
+  </div>
+  <div class="legend" style="padding-top:0">
+    <div class="legend-item" style="color:var(--muted);font-weight:400">* El Excel de CONSUCOOP solo trae el corte de la meta (cumple/no cumple), no las 4 bandas A-E intermedias — esas las estimé de forma proporcional alrededor de cada meta. Si tienes la tabla oficial de rangos por letra, la puedo usar para afinar esto al 100%. Solvencia, Liquidez y ROA también son aproximaciones a la fórmula oficial (no distinguen moneda, promedio de saldos, ni activos improductivos); límites por deudor/grupo familiar, provisión en moneda extranjera y corto plazo no se calculan aquí por falta de detalle en la fuente.</div>
   </div>
   <div class="tbl-wrap">
     <div class="th">
-      <div style="text-align:center">#</div><div>Cooperativa</div>
-      <div>Aportaciones (M)</div>
-      <div style="text-align:right">Activos Netos</div>
-      <div style="text-align:right">Patrimonio</div>
+      <div>#</div><div>Cooperativa</div>
+      <div class="th-sort" data-k="solvencia">Solvencia<span class="th-meta">Meta ≥8.5%</span></div>
+      <div class="th-sort" data-k="morosidad">Morosidad<span class="th-meta">Meta ≤5%</span></div>
+      <div class="th-sort" data-k="cobertura">Cobertura Mora<span class="th-meta">Meta ≥100%</span></div>
+      <div class="th-sort" data-k="liquidez">Liquidez<span class="th-meta">Meta ≥9%</span></div>
+      <div class="th-sort" data-k="roa">ROA<span class="th-meta">Meta ≥0.50%</span></div>
+      <div class="th-sort" data-k="roe">ROE<span class="th-meta">Referencial</span></div>
+      <div class="th-sort" data-k="autosuficiencia">Autosuf. Op.<span class="th-meta">Meta ≥110%</span></div>
     </div>
     <div id="rows"><div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div></div>
   </div>
@@ -229,16 +186,66 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 <script src="data.js"></script>
 <script>
 const MESES={1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'};
-let ROWS=[],PERIODOS=[],IDX={};
 const selYear=document.getElementById('selYear');
 const selMonth=document.getElementById('selMonth');
-function fmt(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
 
-RD.loadBalanceGeneral().then(raw=>{
-  ROWS=RD.agrupar(raw,['activos_net','activos_tot','prestamos','pasivos','obligaciones','patrimonio','provisiones']);
-  PERIODOS=RD.periodos(ROWS);
-  IDX=RD.buildIndex(ROWS);
-  const ultimo=RD.ultimoPeriodo(ROWS);
+// dirección "buena" de cada indicador: desc = más alto es mejor, asc = más bajo es mejor
+const SORT_DIR={solvencia:'desc',morosidad:'asc',cobertura:'desc',liquidez:'desc',roe:'desc',roa:'desc',autosuficiencia:'desc'};
+let sortKey='solvencia';
+
+// semáforo por indicador — metas oficiales CONSUCOOP (parámetros del Excel compartido)
+// solvencia      ~ 3.1 Índice de Capital Institucional        → meta ≥8.5%
+// morosidad      = 2.2 Índice de Morosidad                    → meta ≤5%
+// cobertura      = 2.1 Suficiencia de Provisión para Cartera  → meta ≥100%
+// liquidez       ~ 4.1 Cobertura oblig. depositarias (M.N.)   → meta ≥9%
+// roa            ~ 6.1 Rentabilidad s/ Activos Netos Promedio → meta ≥0.50%
+// autosuficiencia= 5.1 Autosuficiencia Operativa              → meta ≥110%
+// roe            → sin parámetro oficial en la lista CONSUCOOP; se deja como referencia de mercado
+//
+// El Excel solo trae el corte final (cumple / no cumple la meta). Las 4 bandas A-E
+// intermedias se estiman proporcionalmente alrededor de esa meta (ver nota en la página).
+const META={solvencia:8.5,morosidad:5,cobertura:100,liquidez:9,roe:10,roa:0.5,autosuficiencia:110};
+
+function gradeOf(k,v){
+  if(v===null||isNaN(v))return 'na';
+  const meta=META[k];
+  if(meta===undefined)return 'na';
+  if(SORT_DIR[k]==='desc'){
+    const ratio=v/meta;
+    if(ratio>=1.3)return 'a';
+    if(ratio>=1.0)return 'b';
+    if(ratio>=0.85)return 'c';
+    if(ratio>=0.6)return 'd';
+    return 'e';
+  }else{
+    if(v<=meta*0.5)return 'a';
+    if(v<=meta)return 'b';
+    if(v<=meta*1.4)return 'c';
+    if(v<=meta*2)return 'd';
+    return 'e';
+  }
+}
+function badgeClass(k,v){ return gradeOf(k,v); }
+const GRADE_LBL={a:'A',b:'B',c:'C',d:'D',e:'E',na:''};
+function fmtPct(v){
+  if(v===null||isNaN(v))return 'N/D';
+  return v.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+}
+function badgeHTML(k,v){
+  const cls=badgeClass(k,v);
+  const lbl=GRADE_LBL[cls];
+  return `<span class="badge ${cls}">${fmtPct(v)}${lbl?`<span class="g">${lbl}</span>`:''}</span>`;
+}
+
+let BAL=[],RES=[],PERIODOS=[],IDX_BAL={},IDX_RES={};
+
+Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,resRaw])=>{
+  BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones','disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos']);
+  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm']);
+  PERIODOS=RD.periodos(BAL);
+  IDX_BAL=RD.buildIndex(BAL);
+  IDX_RES=RD.buildIndex(RES);
+  const ultimo=RD.ultimoPeriodo(BAL);
   const years=[...new Set(PERIODOS.map(p=>p.split('-')[0]))].sort();
   years.forEach(y=>selYear.add(new Option(y,y)));
   const[ly,lm]=ultimo.split('-');
@@ -250,6 +257,9 @@ RD.loadBalanceGeneral().then(raw=>{
   selMonth.value=parseInt(lm);
   selYear.addEventListener('change',onYearChange);
   selMonth.addEventListener('change',render);
+  document.querySelectorAll('.th-sort').forEach(el=>{
+    el.addEventListener('click',()=>{sortKey=el.dataset.k;render();});
+  });
   render();
 }).catch(e=>{document.getElementById('rows').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
 
@@ -260,58 +270,66 @@ function onYearChange(){
   render();
 }
 
+function calcIndicadores(b,r){
+  const carteraRiesgo=(b?.atrasados||0)+(b?.vencidos||0)+(b?.demanda_judicial||0);
+  const exigTotal=(b?.exig_inmediatas||0)+(b?.exig_depositos||0);
+  return {
+    coop:b.coop,
+    solvencia: b.activos_tot>0 ? b.patrimonio/b.activos_tot*100 : null,
+    morosidad: b.prestamos>0 ? carteraRiesgo/b.prestamos*100 : null,
+    cobertura: carteraRiesgo>0 ? (b.provisiones||0)/carteraRiesgo*100 : null,
+    liquidez: exigTotal>0 ? (b.disponibilidades||0)/exigTotal*100 : null,
+    roe: b.patrimonio>0 && r ? r.excedentes/b.patrimonio*100 : null,
+    roa: b.activos_net>0 && r ? r.excedentes/b.activos_net*100 : null,
+    autosuficiencia: r && r.egresos>0 ? r.ingresos/r.egresos*100 : null,
+  };
+}
+
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const allRows=IDX[p]?Object.values(IDX[p]):[];
-  const totalSistema=allRows.reduce((sum,d)=>sum+(d.patrimonio||0),0);
-  const allSorted=[...allRows].sort((a,b)=>b.patrimonio-a.patrimonio);
+  const balPeriodo = IDX_BAL[p] ? Object.values(IDX_BAL[p]) : [];
+  const resPeriodo = IDX_RES[p] || {};
+  if(!balPeriodo.length) return;
+
+  const all = balPeriodo.map(b=>calcIndicadores(b, resPeriodo[b.coop]));
+
+  document.querySelectorAll('.th-sort').forEach(el=>el.classList.toggle('active',el.dataset.k===sortKey));
+
+  const dir=SORT_DIR[sortKey];
+  const sortable=all.filter(d=>d[sortKey]!==null);
+  const naGroup=all.filter(d=>d[sortKey]===null);
+  sortable.sort((a,b)=> dir==='desc' ? b[sortKey]-a[sortKey] : a[sortKey]-b[sortKey]);
+  const allSorted=[...sortable,...naGroup];
   const sorted=allSorted.slice(0,20);
-  if(!sorted.length) return;
-  const max=sorted[0].patrimonio;
-  // Buscar CAYCSOL en TODOS los datos, no solo el top 20
+
   const cay=allSorted.find(d=>d.coop.includes('CAYCSOL'));
-  const t10=allSorted[9];
   const[y,m]=p.split('-');
   document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
-  document.getElementById('kpiTotal').textContent=fmt(totalSistema);
+
   if(cay){
+    document.getElementById('kpiSolv').textContent=fmtPct(cay.solvencia);
+    document.getElementById('kpiMora').textContent=fmtPct(cay.morosidad);
+    document.getElementById('kpiLiq').textContent=fmtPct(cay.liquidez);
+    document.getElementById('kpiAuto').textContent=fmtPct(cay.autosuficiencia);
     const r=allSorted.indexOf(cay)+1;
-    document.getElementById('kpiRank').textContent='#'+r;
-    document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
-    document.getElementById('kpiVal').textContent=fmt(cay.patrimonio);
-    if(t10&&r>10){
-      document.getElementById('kpiGapLbl').textContent='Brecha al Top 10';
-      document.getElementById('kpiGap').textContent=fmt(t10.patrimonio-cay.patrimonio);
-      document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;
-    }else{
-      const below=allSorted[10];
-      document.getElementById('kpiGapLbl').textContent='Margen sobre Top 10';
-      if(below){
-        document.getElementById('kpiGap').textContent='+'+fmt(cay.patrimonio-below.patrimonio);
-        document.getElementById('kpiGapSub').textContent='Sobre #11: '+below.coop;
-      }else{
-        document.getElementById('kpiGap').textContent='Top 10';
-        document.getElementById('kpiGapSub').textContent='Objetivo logrado 🎯';
-      }
-    }
+    document.getElementById('kpiSolvSub').textContent='Posición #'+r+' en '+sortKey+' · Meta ≥8.5%';
   }
+
   let html='';
   sorted.forEach((d,i)=>{
-    const r=i+1,pct=Math.max(d.patrimonio/max*100,1);
+    const r=i+1;
     const isCay=d.coop.includes('CAYCSOL');
     const rCls=r===1?'gold':r===2?'silver':r===3?'bronze':'';
-    const bCls=isCay?'cc':r===1?'c1':r===2?'c2':r===3?'c3':'cn_';
-    const inside=pct>=20;
-    const val=fmt(d.patrimonio);
     html+=`<div class="tr${isCay?' caycsol-row':''}">
       <div class="rn ${rCls}">${r}</div>
       <div class="cn${isCay?' cay':''}">${d.coop}</div>
-      <div class="bc"><div class="bt">
-        <div class="bf ${bCls}" style="width:${pct}%">${inside?val:''}</div>
-        ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
-      </div></div>
-      <div class="vc">${fmt(d.activos_net)}</div>
-      <div class="vc">${fmt(d.patrimonio)}</div>
+      <div>${badgeHTML('solvencia',d.solvencia)}</div>
+      <div>${badgeHTML('morosidad',d.morosidad)}</div>
+      <div>${badgeHTML('cobertura',d.cobertura)}</div>
+      <div>${badgeHTML('liquidez',d.liquidez)}</div>
+      <div>${badgeHTML('roa',d.roa)}</div>
+      <div>${badgeHTML('roe',d.roe)}</div>
+      <div>${badgeHTML('autosuficiencia',d.autosuficiencia)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
@@ -320,7 +338,6 @@ function render(){
 
 <script id="export-script">
 (function(){
-  // Lista de todas las páginas del dashboard
   const ALL_PAGES = [
     'afiliados.html',
     'activos.html',
@@ -343,14 +360,12 @@ function render(){
     const topbar = document.querySelector('.topbar');
     if (!topbar || document.getElementById('btn-export-single')) return;
 
-    // Botón exportar esta página
     const btnSingle = document.createElement('button');
     btnSingle.id = 'btn-export-single';
     btnSingle.className = 'btn-export';
     btnSingle.innerHTML = '⬇ PDF esta página';
     btnSingle.title = 'Exportar esta vista como PDF';
     btnSingle.addEventListener('click', () => {
-      // Expandir tabla antes de imprimir
       const wrap = document.querySelector('.tbl-wrap');
       if (wrap) {
         wrap.style.overflow = 'visible';
@@ -360,7 +375,6 @@ function render(){
       setTimeout(() => window.print(), 150);
     });
 
-    // Botón exportar todo (abre ventana con todas las páginas en iframe)
     const btnAll = document.createElement('button');
     btnAll.id = 'btn-export-all';
     btnAll.className = 'btn-export btn-export-all';
@@ -374,8 +388,6 @@ function render(){
 
   function exportAll() {
     const baseUrl = window.location.href.replace(/[^/]*$/, '');
-    
-    // Crear ventana con todas las páginas en iframes apilados
     const w = window.open('', '_blank', 'width=1200,height=800');
     if (!w) { alert('Permite ventanas emergentes para exportar el PDF completo.'); return; }
 
@@ -447,14 +459,12 @@ ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame$
     loaded++;
     document.getElementById('status').textContent = 'Cargando... (' + loaded + '/' + total + ')';
     if (loaded === total) {
-      // Esperar que los datos carguen desde GitHub
       setTimeout(() => {
         document.getElementById('status').textContent = '✓ Listo para imprimir';
         document.getElementById('print-btn').style.display = 'block';
       }, 4000);
     }
   }
-  // Escalar iframes para que entren en una página A4
   function scaleFrames() {
     const frames = document.querySelectorAll('iframe');
     frames.forEach(f => {
@@ -475,7 +485,6 @@ ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame$
     w.document.close();
   }
 
-  // Inyectar cuando el DOM esté listo
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', injectButtons);
   } else {
