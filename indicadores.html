@@ -143,7 +143,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 por Activos Netos · 15 indicadores CONSUCOOP por cooperativa</div></div>
+    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 por Activos Netos · 15 indicadores oficiales CONSUCOOP</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -170,27 +170,25 @@ const selMonth=document.getElementById('selMonth');
 
 const GRADE_COLOR={a:'#00A651',b:'#92D050',c:'#FFEB0B',d:'#F2A20C',e:'#FF0000'};
 
-// Los 15 indicadores oficiales de CONSUCOOP (Excel compartido), agrupados en las
-// 6 categorías originales. "computable:false" = no se puede calcular con los
-// datos que trae Balance_General.csv / Estado_de_Resultados.csv (piden detalle
-// por deudor individual, por grupo familiar, o por moneda, que la fuente no trae
-// desglosado). Ahí se muestra N/D en vez de inventar un número.
+// Los 15 indicadores oficiales de CONSUCOOP, con los valores YA CALCULADOS
+// por ellos mismos (hoja "INDICADORES FINANCIEROS" de su Excel mensual,
+// cargados vía data/Indicadores.csv). Ya no se recalculan aproximaciones acá.
 const INDICATORS=[
-  {code:'1.1',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',computable:false,group:1},
-  {code:'1.2',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',computable:false,group:1},
-  {code:'1.3',name:'Créditos a Desarrolladores de Vivienda',metaLabel:'≤10% grupo / 5% c/u',computable:false,group:1},
-  {code:'2.1',key:'cobertura',name:'Suficiencia de Provisión para Cartera',metaLabel:'≥100%',meta:100,dir:'desc',computable:true,group:2},
-  {code:'2.2',key:'morosidad',name:'Índice de Morosidad',metaLabel:'≤5%',meta:5,dir:'asc',computable:true,group:2},
-  {code:'2.3',key:'activos_improd',name:'Activos Improductivos',metaLabel:'≤15%',meta:15,dir:'asc',computable:true,group:2},
-  {code:'3.1',key:'capital_inst',name:'Índice de Capital Institucional',metaLabel:'≥8.5%',meta:8.5,dir:'desc',computable:true,group:3},
-  {code:'3.2',key:'patrim_comprometido',name:'Patrimonio Comprometido por Mora >30d',metaLabel:'<80%',meta:80,dir:'asc',computable:true,group:3},
-  {code:'3.3',name:'Índice de Capital Institucional Ajustado',metaLabel:'≥10%',computable:false,group:3},
-  {code:'4.1',key:'cobertura_dep_mn',name:'Cobertura Depósitos Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',computable:true,group:4},
-  {code:'4.2',name:'Cobertura Depósitos Moneda Extranjera',metaLabel:'≥24%',computable:false,group:4},
-  {code:'4.3',name:'Cobertura de Obligaciones de Corto Plazo',metaLabel:'≥110%',computable:false,group:4},
-  {code:'5.1',key:'autosuficiencia',name:'Autosuficiencia Operativa',metaLabel:'≥110%',meta:110,dir:'desc',computable:true,group:5},
-  {code:'5.2',key:'eficiencia_activos',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',computable:true,group:5},
-  {code:'6.1',key:'roa',name:'Rentabilidad sobre Activos Netos Promedio',metaLabel:'≥0.50%',meta:0.5,dir:'desc',computable:true,group:6},
+  {code:'1.1',key:'LIMITE_DEUDOR',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',meta:7.5,dir:'asc',group:1},
+  {code:'1.2',key:'CONCENTRACION_FAMILIAR',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',meta:10,dir:'asc',group:1},
+  {code:'1.3',key:'CREDITO_VIVIENDA',name:'Créditos a Desarrolladores de Vivienda',metaLabel:'≤10% grupo / 5% c/u',meta:10,dir:'asc',group:1},
+  {code:'2.1',key:'COBERTURA_MORA',name:'Suficiencia de Provisión para Cartera',metaLabel:'≥100%',meta:100,dir:'desc',group:2},
+  {code:'2.2',key:'MOROSIDAD',name:'Índice de Morosidad',metaLabel:'≤5%',meta:5,dir:'asc',group:2},
+  {code:'2.3',key:'ACTIVOS_IMPRODUCTIVOS',name:'Activos Improductivos',metaLabel:'≤15%',meta:15,dir:'asc',group:2},
+  {code:'3.1',key:'CAPITAL_INSTITUCIONAL',name:'Índice de Capital Institucional',metaLabel:'≥8.5%',meta:8.5,dir:'desc',group:3},
+  {code:'3.2',key:'PATRIMONIO_COMPROMETIDO',name:'Patrimonio Comprometido por Mora',metaLabel:'<80%',meta:80,dir:'asc',group:3},
+  {code:'3.3',key:'SOLVENCIA_PATRIMONIAL',name:'Índice de Solvencia Patrimonial',metaLabel:'≥10%',meta:10,dir:'desc',group:3},
+  {code:'4.1',key:'COBERTURA_DEPOSITOS_MN',name:'Cobertura Depósitos Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',group:4},
+  {code:'4.2',key:'COBERTURA_DEPOSITOS_ME',name:'Cobertura Depósitos Moneda Extranjera',metaLabel:'≥24%',meta:24,dir:'desc',group:4},
+  {code:'4.3',key:'COBERTURA_CORTO_PLAZO',name:'Cobertura de Obligaciones de Corto Plazo',metaLabel:'≥110%',meta:110,dir:'desc',group:4},
+  {code:'5.1',key:'AUTOSUFICIENCIA',name:'Autosuficiencia Operativa',metaLabel:'≥110%',meta:110,dir:'desc',group:5},
+  {code:'5.2',key:'EFICIENCIA_ACTIVOS_PROD',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',group:5},
+  {code:'6.1',key:'ROA',name:'Rentabilidad sobre Activos Netos Promedio',metaLabel:'≥0.50%',meta:0.5,dir:'desc',group:6},
 ];
 const GROUPS=[
   {n:1,name:'1. Límites de Riesgo'},
@@ -222,11 +220,8 @@ function fmtPct(v){
 function fmtM(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
 
 function ringHTML(item,value){
-  if(!item.computable || value===null || value===undefined || isNaN(value)){
-    const why=item.computable
-      ? 'sin datos suficientes en este periodo'
-      : 'no calculable: la fuente no trae el desglose que pide este indicador';
-    return `<div class="ring-wrap" title="${item.code} ${item.name} — ${why}">
+  if(value===null || value===undefined || isNaN(value)){
+    return `<div class="ring-wrap" title="${item.code} ${item.name} — sin dato en la fuente oficial de CONSUCOOP para este periodo">
       <div class="ring na"><div class="ring-inner"><div class="ring-val">N/D</div></div></div>
       <div class="ring-code">${item.code}</div>
     </div>`;
@@ -245,17 +240,14 @@ function ringHTML(item,value){
   </div>`;
 }
 
-let BAL=[],RES=[],PERIODOS=[],IDX_BAL={},IDX_RES={};
+let BAL=[],IND=[],PERIODOS=[],IDX_BAL={},IDX_IND={};
 
-Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,resRaw])=>{
-  BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones',
-    'disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos',
-    'aportaciones','activos_eventuales','cargos_diferidos','propiedad_planta_equipo','inversiones',
-    'depositos_ahorro','dpf','depositos_bch','depositos_bancos']);
-  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm','prod_fin','gast_fin']);
+Promise.all([RD.loadBalanceGeneral(),RD.loadIndicadoresOficial()]).then(([balRaw,indRaw])=>{
+  BAL=RD.agrupar(balRaw,['activos_net']);
+  IND=indRaw; // ya viene 1 fila por cooperativa+periodo, no hace falta agrupar
   PERIODOS=RD.periodos(BAL);
   IDX_BAL=RD.buildIndex(BAL);
-  IDX_RES=RD.buildIndex(RES);
+  IDX_IND=RD.buildIndex(IND);
   const ultimo=RD.ultimoPeriodo(BAL);
   const years=[...new Set(PERIODOS.map(p=>p.split('-')[0]))].sort();
   years.forEach(y=>selYear.add(new Option(y,y)));
@@ -278,41 +270,6 @@ function onYearChange(){
   render();
 }
 
-function calcIndicadores(b,r){
-  // 2.2 Índice de Morosidad = Créditos en mora > 90 días / Total cartera.
-  // "Vencidos" y "Demanda Judicial" son la mora > 90 días; "Atrasados" es
-  // mora temprana (< 90 días) y NO entra en este indicador.
-  const moraMayor90=(b.vencidos||0)+(b.demanda_judicial||0);
-  // 3.2 usa "mora > 30 días": con el desglose disponible (Atrasados/Vencidos/
-  // Demanda Judicial) no se puede aislar el corte exacto de 30 días dentro de
-  // "Atrasados", así que se aproxima con el total de cartera en riesgo.
-  const carteraRiesgo=(b.atrasados||0)+(b.vencidos||0)+(b.demanda_judicial||0);
-  // si TODO el desglose de mora viene en blanco ese mes (pasa en periodos
-  // recientes) pero sí hay préstamos activos, es que no se reportó todavía —
-  // no que la cooperativa tenga 0% de mora real.
-  const moraReportada = !(carteraRiesgo===0 && b.prestamos>0);
-  // 4.1 "Reservas Líquidas en Moneda Nacional" = disponibilidades en BCH +
-  // bancos del país (no toda la cuenta DISPONIBILIDADES, que puede incluir
-  // otros rubros). "Total Captado en Moneda Nacional" = depósitos de ahorro + DPF.
-  const reservasLiqMN=(b.depositos_bch||0)+(b.depositos_bancos||0);
-  const depMN=(b.depositos_ahorro||0)+(b.dpf||0);
-  const activosProductivos=(b.prestamos||0)+(b.inversiones||0);
-
-  return {
-    coop:b.coop,
-    activos_net:b.activos_net,
-    cobertura: (moraReportada && carteraRiesgo>0) ? (b.provisiones||0)/carteraRiesgo*100 : null,
-    morosidad: (moraReportada && b.prestamos>0) ? moraMayor90/b.prestamos*100 : null,
-    activos_improd: b.activos_net>0 ? ((b.activos_eventuales||0)+(b.cargos_diferidos||0)+(b.propiedad_planta_equipo||0)+carteraRiesgo)/b.activos_net*100 : null,
-    capital_inst: b.activos_net>0 ? (b.patrimonio-(b.aportaciones||0))/b.activos_net*100 : null,
-    patrim_comprometido: (moraReportada && b.patrimonio>0) ? carteraRiesgo/b.patrimonio*100 : null,
-    cobertura_dep_mn: depMN>0 ? reservasLiqMN/depMN*100 : null,
-    autosuficiencia: (r && (r.gast_fin+r.gast_adm)>0) ? r.prod_fin/(r.gast_fin+r.gast_adm)*100 : null,
-    eficiencia_activos: (r && activosProductivos>0) ? r.gast_adm/activosProductivos*100 : null,
-    roa: (r && b.activos_net>0) ? r.excedentes/b.activos_net*100 : null,
-  };
-}
-
 function cardHTML(b,d,rank,maxActivos){
   const isCay=b.coop.includes('CAYCSOL');
   const rCls=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
@@ -322,7 +279,7 @@ function cardHTML(b,d,rank,maxActivos){
   GROUPS.forEach(gr=>{
     const items=INDICATORS.filter(i=>i.group===gr.n);
     let rings='';
-    items.forEach(it=>{ rings+=ringHTML(it, it.key?d[it.key]:null); });
+    items.forEach(it=>{ rings+=ringHTML(it, d?d[it.key]:null); });
     groups+=`<div class="group-block">
       <div class="group-title">${gr.name}</div>
       <div class="group-rings">${rings}</div>
@@ -346,7 +303,7 @@ function cardHTML(b,d,rank,maxActivos){
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
   const balPeriodo = IDX_BAL[p] ? Object.values(IDX_BAL[p]) : [];
-  const resPeriodo = IDX_RES[p] || {};
+  const indPeriodo = IDX_IND[p] || {};
   if(!balPeriodo.length) return;
 
   const[y,m]=p.split('-');
@@ -357,14 +314,14 @@ function render(){
 
   let html='';
   sorted.forEach((b,i)=>{
-    const d=calcIndicadores(b, resPeriodo[b.coop]);
-    html+=cardHTML(b,d,i+1,maxActivos);
+    html+=cardHTML(b, indPeriodo[b.coop], i+1, maxActivos);
   });
   document.getElementById('cardsWrap').innerHTML=html;
 }
 </script>
 
 <script id="export-script">
+
 (function(){
   const ALL_PAGES = [
     'afiliados.html',
