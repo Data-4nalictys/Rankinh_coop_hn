@@ -50,17 +50,6 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .profile-name{font-size:20px;font-weight:900;color:var(--text)}
 .profile-name.cay{color:var(--accent)}
 .profile-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.rank-pill{display:flex;flex-direction:column;gap:4px;background:var(--accent-light);border:1px solid #a7d9c0;border-radius:10px;padding:8px 16px}
-.rank-pill.gold{background:#fff7e6;border-color:#fbd38d}
-.rank-pill.silver{background:#f1f5f9;border-color:#cbd5e1}
-.rank-pill.bronze{background:#fef3e2;border-color:#f6cd9a}
-.rank-pill-lbl{font-size:9px;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
-.rank-pill.gold .rank-pill-lbl{color:#d97706}
-.rank-pill.silver .rank-pill-lbl{color:#64748b}
-.rank-pill.bronze .rank-pill-lbl{color:#b45309}
-.rank-pill-row{display:flex;align-items:baseline;gap:5px}
-.rank-pill-num{font-size:22px;font-weight:900;color:var(--text);line-height:1}
-.rank-pill-total{font-size:11px;font-weight:700;color:var(--text2)}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 .sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
 .sel:focus{outline:none;border-color:var(--accent)}
@@ -341,10 +330,7 @@ function selectCoop(coop){
   const isCay=coop.includes('CAYCSOL');
   document.getElementById('content').innerHTML=`
     <div class="profile-head">
-      <div class="profile-title-row">
-        <div class="profile-name${isCay?' cay':''}">${coop}</div>
-        <div id="rankPillWrap"></div>
-      </div>
+      <div class="profile-name${isCay?' cay':''}">${coop}</div>
       <div class="controls">
         <div class="sel-w"><select class="sel" id="selYear"></select></div>
         <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -394,19 +380,6 @@ function renderProfile(){
   const rkIngresos=rankOf(resPeriodo,selected,'ingresos');
   const rkEgresos=rankOf(resPeriodo,selected,'egresos');
   const rkExcedentes=rankOf(resPeriodo,selected,'excedentes');
-
-  const pillWrap=document.getElementById('rankPillWrap');
-  if(pillWrap){
-    if(rkActivos){
-      const cls=rkActivos.rank===1?'gold':rkActivos.rank===2?'silver':rkActivos.rank===3?'bronze':'';
-      pillWrap.innerHTML=`<div class="rank-pill ${cls}">
-        <div class="rank-pill-lbl">Posición · Activos Netos</div>
-        <div class="rank-pill-row"><span class="rank-pill-num">#${rkActivos.rank}</span><span class="rank-pill-total">de ${rkActivos.total}</span></div>
-      </div>`;
-    }else{
-      pillWrap.innerHTML='';
-    }
-  }
 
   let groups='';
   GROUPS.forEach(gr=>{
