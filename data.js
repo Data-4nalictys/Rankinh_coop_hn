@@ -229,6 +229,33 @@ async function loadBalanceGeneral() {
 
       exig_depositos:
         toNum(r['EXIGIBILIDADES X DEPOSITOS']),
+
+      aportaciones:
+        toNum(r['Aportaciones']),
+
+      activos_eventuales:
+        toNum(r['ACTIVOS EVENTUALES']),
+
+      cargos_diferidos:
+        toNum(r['CARGOS DIFERIDOS']),
+
+      propiedad_planta_equipo:
+        toNum(r['PROPIEDAD, PLANTA, EQUIPO']) + toNum(r['PROPIEDAD PLANTA EQUIPO']),
+
+      inversiones:
+        toNum(r['INVERSIONES']),
+
+      depositos_ahorro:
+        toNum(r['Depositos Ahorro hn']),
+
+      dpf:
+        toNum(r['DPF hn']),
+
+      depositos_bch:
+        toNum(r['Depositos BCH hn']),
+
+      depositos_bancos:
+        toNum(r['Depositos Bancos hn']),
     }));
 }
 
@@ -276,6 +303,54 @@ async function loadEstadoResultados() {
       gast_adm:
         toNum(r['Gastos de Administracion']),
     }));
+}
+
+// ════════════════════════════════════════════════════════════
+// INDICADORES FINANCIEROS (fuente oficial CONSUCOOP)
+// ════════════════════════════════════════════════════════════
+
+async function loadIndicadoresOficial() {
+
+  const rows =
+    await fetchCSV('Indicadores.csv');
+
+  const NUM_COLS = [
+    'LIMITE_DEUDOR','CONCENTRACION_FAMILIAR','CREDITO_VIVIENDA',
+    'COBERTURA_MORA','MOROSIDAD','ACTIVOS_IMPRODUCTIVOS',
+    'CAPITAL_INSTITUCIONAL','PATRIMONIO_COMPROMETIDO','SOLVENCIA_PATRIMONIAL',
+    'COBERTURA_DEPOSITOS_MN','COBERTURA_DEPOSITOS_ME','COBERTURA_CORTO_PLAZO',
+    'AUTOSUFICIENCIA','EFICIENCIA_ACTIVOS_PROD','ROA',
+  ];
+
+  return rows
+
+    .filter(r =>
+      r['COOPERATIVA'] &&
+      !r['COOPERATIVA']
+        .toUpperCase()
+        .includes('FACACH')
+    )
+
+    .map(r => {
+
+      const out = {
+
+        coop:
+          r['COOPERATIVA'].trim(),
+
+        periodo:
+          mkPeriodo(r['AÑO'], r['MES#']),
+      };
+
+      NUM_COLS.forEach(c => {
+        const raw = r[c];
+        out[c] = (raw === '' || raw === undefined || raw === null)
+          ? null
+          : toNum(raw);
+      });
+
+      return out;
+    });
 }
 
 // ════════════════════════════════════════════════════════════
@@ -401,6 +476,7 @@ window.RD = {
   loadBalanceGeneral,
   loadEstadoResultados,
   loadAfiliados,
+  loadIndicadoresOficial,
   agrupar,
   periodos,
   ultimoPeriodo,
