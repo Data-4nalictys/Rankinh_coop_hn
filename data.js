@@ -306,6 +306,54 @@ async function loadEstadoResultados() {
 }
 
 // ════════════════════════════════════════════════════════════
+// INDICADORES FINANCIEROS (fuente oficial CONSUCOOP)
+// ════════════════════════════════════════════════════════════
+
+async function loadIndicadoresOficial() {
+
+  const rows =
+    await fetchCSV('Indicadores.csv');
+
+  const NUM_COLS = [
+    'LIMITE_DEUDOR','CONCENTRACION_FAMILIAR','CREDITO_VIVIENDA',
+    'COBERTURA_MORA','MOROSIDAD','ACTIVOS_IMPRODUCTIVOS',
+    'CAPITAL_INSTITUCIONAL','PATRIMONIO_COMPROMETIDO','SOLVENCIA_PATRIMONIAL',
+    'COBERTURA_DEPOSITOS_MN','COBERTURA_DEPOSITOS_ME','COBERTURA_CORTO_PLAZO',
+    'AUTOSUFICIENCIA','EFICIENCIA_ACTIVOS_PROD','ROA',
+  ];
+
+  return rows
+
+    .filter(r =>
+      r['COOPERATIVA'] &&
+      !r['COOPERATIVA']
+        .toUpperCase()
+        .includes('FACACH')
+    )
+
+    .map(r => {
+
+      const out = {
+
+        coop:
+          r['COOPERATIVA'].trim(),
+
+        periodo:
+          mkPeriodo(r['AÑO'], r['MES#']),
+      };
+
+      NUM_COLS.forEach(c => {
+        const raw = r[c];
+        out[c] = (raw === '' || raw === undefined || raw === null)
+          ? null
+          : toNum(raw);
+      });
+
+      return out;
+    });
+}
+
+// ════════════════════════════════════════════════════════════
 // AFILIADOS
 // ════════════════════════════════════════════════════════════
 
@@ -428,6 +476,7 @@ window.RD = {
   loadBalanceGeneral,
   loadEstadoResultados,
   loadAfiliados,
+  loadIndicadoresOficial,
   agrupar,
   periodos,
   ultimoPeriodo,

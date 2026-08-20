@@ -25,6 +25,7 @@ RUTA_ER       = BASE / "Estado_de_Resultados.csv"
 RUTA_AFIL     = BASE / "Afiliados.csv"
 RUTA_NO_MATCH = BASE / "cooperativas_sin_match.txt"
 RUTA_IND      = BASE / "Indicadores.csv"
+HOJA_IND_OFICIAL = "INDICADORES FINANCIEROS"
 HOJA_BG       = "Balance General"
 HOJA_ER       = "Estado de Resultado"
 HOJA_AFIL     = "DETALLE DE AFILIADO POR GENERO"
@@ -248,118 +249,96 @@ def procesar_eeff(ruta, mapa, sin_match):
         r.to_csv(RUTA_ER, index=False, encoding="utf-8-sig")
         print(f"  → Estado_de_Resultados.csv actualizado ({len(r)} filas)")
 
-# ── INDICADORES: FUNCIONES CORE ───────────────────────────
-def a_float(col):
-    """Convierte una columna string (con comas de miles) a numerico float."""
-    return pd.to_numeric(
-        col.astype(str).str.replace(",", "", regex=False).str.strip(),
-        errors="coerce"
-    ).fillna(0.0)
+# ── INDICADORES FINANCIEROS: FUENTE OFICIAL CONSUCOOP ─────
+# CONSUCOOP publica cada mes "7_-Indicadores-Financieros.xlsx" con los 15
+# indicadores YA CALCULADOS por ellos (hoja "INDICADORES FINANCIEROS",
+# consolidado historico 2019-hoy). Esto reemplaza cualquier intento de
+# recalcular los indicadores a mano desde Balance_General/Estado_de_Resultados:
+# los valores oficiales ya incluyen los que Balance_General.csv no puede dar
+# (limite por deudor individual, grupo familiar, moneda extranjera, etc.)
+# porque CONSUCOOP si tiene el detalle por deudor que nosotros no tenemos.
+IND_COLS_OFICIAL = [
+    "COOPERATIVA", "MES#", "AÑO",
+    "LIMITE_DEUDOR", "CONCENTRACION_FAMILIAR", "CREDITO_VIVIENDA",
+    "COBERTURA_MORA", "MOROSIDAD", "ACTIVOS_IMPRODUCTIVOS",
+    "CAPITAL_INSTITUCIONAL", "PATRIMONIO_COMPROMETIDO", "SOLVENCIA_PATRIMONIAL",
+    "COBERTURA_DEPOSITOS_MN", "COBERTURA_DEPOSITOS_ME", "COBERTURA_CORTO_PLAZO",
+    "AUTOSUFICIENCIA", "EFICIENCIA_ACTIVOS_PROD", "ROA",
+]
+
+# Orden de columnas E..S en la hoja "INDICADORES FINANCIEROS" del Excel oficial,
+# en el mismo orden que IND_COLS_OFICIAL[3:] (despues de COOPERATIVA/MES#/AÑO).
+COLS_EXCEL_IND = [
+    "Límite de créditos un solo deudor afiliado",
+    "Concentración crediticia por grupo familiar del deudor afiliado",
+    "Créditos otorgados a desarrolladores de proyectos",
+    "Suficiencia provisión de cartera crediticia",
+    "Índice de morosidad",
+    "Activos improductivos",
+    "Índice de capital institucional",
+    "Patrimonio comprometido cartera >30",
+    "Índice de solvencia patrimonial",
+    "Cobertura obligaciones depositarias MN",
+    "Cobertura obligaciones depositarias ME",
+    "Cobertura obligaciones corto plazo",
+    "Autosuficiencia operativa",
+    "Eficiencia activos productivos neto promedio",
+    "Rentabilidad activos netos promedio",
+]
 
 
-def calificar(valor, meta, direccion):
-    """Devuelve la letra A-E segun que tan lejos esta el valor de la meta."""
-    if pd.isna(valor):
-        return ""
-    if direccion == "desc":
-        ratio = valor / meta if meta else 0
-        if ratio >= 1.30: return "A"
-        if ratio >= 1.00: return "B"
-        if ratio >= 0.85: return "C"
-        if ratio >= 0.60: return "D"
-        return "E"
-    else:
-        if valor <= meta * 0.50: return "A"
-        if valor <= meta:        return "B"
-        if valor <= meta * 1.40: return "C"
-        if valor <= meta * 2.00: return "D"
-        return "E"
+def periodos_ind(ruta):
+    if not Path(ruta).exists(): return set()
+    df = pd.read_csv(ruta, encoding="utf-8-sig", dtype=str, usecols=["MES#","AÑO"])
+    return set(zip(df["MES#"].str.strip(), df["AÑO"].str.strip()))
 
 
-def cargar_balance_indicadores():
-    bg = pd.read_csv(RUTA_BG, encoding="utf-8-sig", dtype=str)
-    bg.columns = bg.columns.str.strip()
+def procesar_indicadores_oficial(ruta, mapa, sin_match):
+    """Lee la hoja consolidada 'INDICADORES FINANCIEROS' del Excel oficial de
+    CONSUCOOP y (re)genera Indicadores.csv con los 15 indicadores reales."""
+    print(f"  Leyendo '{HOJA_IND_OFICIAL}'...")
+    df = pd.read_excel(ruta, sheet_name=HOJA_IND_OFICIAL, header=None, dtype=object)
 
-    campos = [
-        "ACTIVOS TOTALES", "ACTIVOS NETOS", "PRESTAMOS", "PATRIMONIO",
-        "PROVISIONES DE VALUACION", "DISPONIBILIDADES",
-        "EXIGIBILIDADES INMEDIATAS", "EXIGIBILIDADES X DEPOSITOS",
-        "Vigentes hn", "Atrasados hn", "Vencidos hn", "Demanda Judicial hn",
-    ]
-    for c in campos:
-        if c not in bg.columns:
-            print(f"  Advertencia: '{c}' no existe en {RUTA_BG.name} (se asume 0). "
-                  f"Revisa BG_COLS si es una columna de mora/depositos.")
-            bg[c] = 0
-
-    # Si Atrasados/Vencidos/Demanda Judicial vienen las 3 en blanco (no
-    # reportadas todavia), la cartera en riesgo debe quedar SIN DATO, no en
-    # 0% -- de lo contrario Morosidad se ve falsamente "sana".
-    mora_cols = ["Atrasados hn", "Vencidos hn", "Demanda Judicial hn"]
-    sin_mora_reportada = bg[mora_cols].apply(
-        lambda col: col.isna() | col.astype(str).str.strip().eq("")
-    ).all(axis=1)
-
-    for c in campos:
-        bg[c] = a_float(bg[c])
-
-    bg["CARTERA EN RIESGO"] = bg["Atrasados hn"] + bg["Vencidos hn"] + bg["Demanda Judicial hn"]
-    bg.loc[sin_mora_reportada, "CARTERA EN RIESGO"] = np.nan
-    bg["EXIGIBILIDADES TOTALES"] = bg["EXIGIBILIDADES INMEDIATAS"] + bg["EXIGIBILIDADES X DEPOSITOS"]
-    return bg
-
-
-def cargar_resultados_indicadores():
-    er = pd.read_csv(RUTA_ER, encoding="utf-8-sig", dtype=str)
-    er.columns = er.columns.str.strip()
-    for c in ("INGRESOS", "EGRESOS", "EXCEDENTES"):
-        er[c] = a_float(er[c]) if c in er.columns else 0
-    return er
-
-
-def calcular_indicadores(bg, er):
-    df = bg.merge(
-        er[["COOPERATIVA", "MES#", "AÑO", "INGRESOS", "EGRESOS", "EXCEDENTES"]],
-        on=["COOPERATIVA", "MES#", "AÑO"], how="left"
-    )
-
-    df["SOLVENCIA"] = (df["PATRIMONIO"] / df["ACTIVOS TOTALES"].replace(0, np.nan)) * 100
-    df["MOROSIDAD"] = (df["CARTERA EN RIESGO"] / df["PRESTAMOS"].replace(0, np.nan)) * 100
-    df["COBERTURA MORA"] = (df["PROVISIONES DE VALUACION"] / df["CARTERA EN RIESGO"].replace(0, np.nan)) * 100
-    df["LIQUIDEZ"] = (df["DISPONIBILIDADES"] / df["EXIGIBILIDADES TOTALES"].replace(0, np.nan)) * 100
-    df["ROA"] = (df["EXCEDENTES"] / df["ACTIVOS NETOS"].replace(0, np.nan)) * 100
-    df["ROE"] = (df["EXCEDENTES"] / df["PATRIMONIO"].replace(0, np.nan)) * 100
-    df["AUTOSUFICIENCIA"] = (df["INGRESOS"] / df["EGRESOS"].replace(0, np.nan)) * 100
-
-    for ind, (meta, direccion) in METAS_IND.items():
-        df[f"RANGO {ind}"] = df[ind].apply(lambda v: calificar(v, meta, direccion))
-
-    for ind in METAS_IND:
-        df[ind] = df[ind].round(2)
-
-    return df.reindex(columns=IND_COLS)
-
-
-def generar_indicadores():
-    """Recalcula Indicadores.csv completo a partir de Balance_General.csv y
-    Estado_de_Resultados.csv ya actualizados. Se corre siempre al final,
-    tenga o no la corrida actual archivos --eeff/--afiliados nuevos."""
-    print("\nIndicadores Financieros (CONSUCOOP):")
-    if not RUTA_BG.exists() or not RUTA_ER.exists():
-        print("  Advertencia: faltan Balance_General.csv y/o Estado_de_Resultados.csv, "
-              "no se genera Indicadores.csv todavia.")
+    # La hoja trae varias filas de titulo antes del encabezado real; buscamos
+    # la fila donde la columna B dice "Nombre de Cooperativa".
+    hdr_row = None
+    for i in range(min(10, len(df))):
+        if str(df.iloc[i, 1]).strip() == "Nombre de Cooperativa":
+            hdr_row = i
+            break
+    if hdr_row is None:
+        print(f"  Advertencia: no se encontró el encabezado en '{HOJA_IND_OFICIAL}', se omite.")
         return
 
-    bg = cargar_balance_indicadores()
-    er = cargar_resultados_indicadores()
-    ind = calcular_indicadores(bg, er)
-    ind.to_csv(RUTA_IND, index=False, encoding="utf-8-sig")
-    print(f"  → {RUTA_IND.name} generado ({len(ind)} filas)")
+    body = df.iloc[hdr_row+1:].copy()
+    body.columns = df.iloc[hdr_row].tolist()
+    body = body[body["Nombre de Cooperativa"].notna()]
+    body = body[body["Nombre de Cooperativa"].astype(str).str.strip() != ""]
 
-    sin_mora = ind["MOROSIDAD"].isna().sum()
-    if sin_mora:
-        print(f"  Advertencia: {sin_mora} fila(s) sin desglose de mora reportado "
-              f"(Atrasados/Vencidos/Demanda Judicial) -> MOROSIDAD queda vacio ahi.")
+    out = pd.DataFrame()
+    out["COOPERATIVA"] = body["Nombre de Cooperativa"].apply(lambda x: resolver(x, mapa, sin_match))
+    out["MES#"] = body["Mes "].astype(str).str.strip().str.lower().map(MESES_ES).fillna(0).astype(int).astype(str)
+    out["AÑO"]  = body["Año "].astype(str).str.strip().str.split(".").str[0]
+
+    for col_out, col_excel in zip(IND_COLS_OFICIAL[3:], COLS_EXCEL_IND):
+        if col_excel in body.columns:
+            out[col_out] = pd.to_numeric(body[col_excel], errors="coerce") * 100
+            out[col_out] = out[col_out].round(2)
+        else:
+            print(f"  Advertencia: columna '{col_excel}' no encontrada en el Excel, queda vacía.")
+            out[col_out] = pd.NA
+
+    out = out.reindex(columns=IND_COLS_OFICIAL)
+
+    # Reemplazamos Indicadores.csv completo: es la fuente oficial y siempre
+    # la mas reciente/correcta, no tiene sentido acumular versiones viejas.
+    out.to_csv(RUTA_IND, index=False, encoding="utf-8-sig")
+    print(f"  → {RUTA_IND.name} generado ({len(out)} filas, fuente oficial CONSUCOOP)")
+
+    for col_out, col_excel in zip(IND_COLS_OFICIAL[3:], COLS_EXCEL_IND):
+        vacios = out[col_out].isna().sum()
+        if vacios:
+            print(f"  Advertencia: {vacios} fila(s) sin '{col_excel}' -> {col_out} queda vacío ahí.")
 
 
 # ── PROCESAR AFILIADOS ────────────────────────────────────
@@ -409,8 +388,9 @@ def procesar_afiliados(ruta, mapa, sin_match):
 # ── MAIN ─────────────────────────────────────────────────
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Actualiza los CSV base con datos del CONSUCOOP")
-    parser.add_argument("--eeff",      metavar="RUTA", help="Excel de Estados Financieros")
-    parser.add_argument("--afiliados", metavar="RUTA", help="Excel de Afiliados")
+    parser.add_argument("--eeff",       metavar="RUTA", help="Excel de Estados Financieros")
+    parser.add_argument("--afiliados",  metavar="RUTA", help="Excel de Afiliados")
+    parser.add_argument("--indicadores",metavar="RUTA", help="Excel de Indicadores Financieros (CONSUCOOP)")
 
     args = parser.parse_args()
 
@@ -442,10 +422,23 @@ if __name__ == "__main__":
         if archivos_afiliados:
             args.afiliados = str(archivos_afiliados[0])
 
+    # Buscar Indicadores Financieros más reciente (con o sin número de versión, ej. "-2")
+    if not args.indicadores:
+
+        archivos_ind = sorted(
+            set(downloads.glob("7_-Indicadores-Financieros.xlsx")) |
+            set(downloads.glob("7_-Indicadores-Financieros-*.xlsx")) |
+            set(downloads.glob("7*Indicadores*Financieros*.xlsx")),
+            key=lambda x: x.stat().st_mtime,
+            reverse=True
+        )
+
+        if archivos_ind:
+            args.indicadores = str(archivos_ind[0])
+
     # Validación
-    if not args.eeff and not args.afiliados:
-        print("⚠ No se encontraron archivos nuevos en Downloads: solo se va a refrescar Indicadores.csv")
-        print("  con lo que ya hay en Balance_General.csv / Estado_de_Resultados.csv.\n")
+    if not args.eeff and not args.afiliados and not args.indicadores:
+        print("⚠ No se encontraron archivos nuevos en Downloads. Nada que procesar.")
 
 
 
@@ -461,8 +454,9 @@ if __name__ == "__main__":
     if args.afiliados:
         print(f"\nAfiliados:\n  {args.afiliados}")
         procesar_afiliados(Path(args.afiliados), mapa, sin_match)
-
-    generar_indicadores()
+    if args.indicadores:
+        print(f"\nIndicadores Financieros:\n  {args.indicadores}")
+        procesar_indicadores_oficial(Path(args.indicadores), mapa, sin_match)
 
     print("\n" + "=" * 55)
     if sin_match:
