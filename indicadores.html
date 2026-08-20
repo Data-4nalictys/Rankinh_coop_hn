@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranking HN — Indicadores Financieros</title>
+<style>
+:root{--bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;--accent:#1a6b4a;--accent-light:#eaf7f1;--text:#111827;--text2:#6b7280;--muted:#9ca3af;--sh:0 1px 3px rgba(0,0,0,.06)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;overflow:hidden}
+.shell{display:grid;grid-template-columns:192px 1fr;grid-template-rows:56px 1fr;height:100vh}
+@media(max-width:700px){.shell{grid-template-columns:1fr}.sidebar{display:none}}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--sh);flex-wrap:wrap;gap:6px}
+.logo{width:30px;height:30px;border-radius:7px;background:linear-gradient(135deg,#1a6b4a,#2d9e6b);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
+.brand-txt{font-size:14px;font-weight:900;color:var(--text)}.brand-sub{font-size:10px;color:var(--muted)}
+.period-pill{background:var(--accent-light);border:1px solid #a7d9c0;border-radius:20px;padding:4px 14px;font-size:11px;font-weight:700;color:var(--accent);white-space:nowrap}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:14px 0;display:flex;flex-direction:column;overflow:hidden}
+.nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+.nav-sec:first-child{padding-top:0}
+.nav-a{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:.1s}
+.nav-a:hover{color:var(--text);background:var(--bg)}
+.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
+.nav-icon{width:15px;text-align:center;font-size:12px}
+.nav-sep{height:1px;background:var(--border);margin:8px 14px}
+.nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
+.main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ph{padding:12px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
+.ph-title{font-size:18px;font-weight:900;color:var(--text)}.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.controls{display:flex;gap:6px;flex-wrap:wrap}
+.sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
+.sel:focus{outline:none;border-color:var(--accent)}
+.sel-w{position:relative;display:inline-block}
+.sel-w::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:9px}
+
+.legend{display:flex;align-items:center;gap:10px;padding:0 20px 10px;flex-shrink:0;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text2)}
+.legend-dot{width:14px;height:14px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff}
+.legend-dot.a{background:#00A651}.legend-dot.b{background:#92D050;color:#3a5c14}.legend-dot.c{background:#FFEB0B;color:#7a6a00}.legend-dot.d{background:#F2A20C}.legend-dot.e{background:#FF0000}
+.legend-dot.na{background:var(--surface2);border:2px dashed var(--border);color:var(--muted)}
+
+.cards-wrap{flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.cards-wrap::-webkit-scrollbar{width:6px}
+.cards-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+
+.coop-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:12px;box-shadow:var(--sh);animation:fu .18s ease both}
+.coop-card.cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f8fdfa,var(--accent-light))}
+
+.card-head{display:flex;align-items:center;gap:12px}
+.card-rank{font-size:20px;font-weight:900;color:var(--muted);width:30px;text-align:center;flex-shrink:0}
+.card-rank.gold{color:#d97706}.card-rank.silver{color:#94a3b8}.card-rank.bronze{color:#b45309}
+.card-name{font-size:15px;font-weight:900;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-name.cay{color:var(--accent)}
+.card-activos{text-align:right;flex-shrink:0}
+.card-activos-val{font-size:16px;font-weight:900;color:var(--text)}
+.card-activos-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.card-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:8px 0 12px}
+.card-bar-fill{height:100%;background:linear-gradient(90deg,#1e40af,#3b82f6);border-radius:3px;transition:width .4s ease}
+
+.groups-row{display:flex;flex-wrap:wrap;gap:16px 22px;padding-top:10px;border-top:1px solid var(--border)}
+.group-block{min-width:160px}
+.group-title{font-size:9px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.group-rings{display:flex;gap:8px;flex-wrap:wrap}
+
+.ring-wrap{display:flex;align-items:center;justify-content:center}
+.ring{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--rc,#9ca3af) calc(var(--pct,0)*1%), var(--surface2) 0)}
+.ring-inner{position:absolute;inset:6px;background:var(--surface);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+.ring-val{font-size:9px;font-weight:900;color:var(--text)}
+.ring-grade{font-size:8px;font-weight:900;margin-top:1px}
+.ring.na{background:var(--surface2);border:2px dashed var(--border)}
+.ring.na .ring-inner{background:transparent;inset:0}
+.ring.na .ring-val{font-size:8.5px;color:var(--muted);font-weight:800}
+
+.loading{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:12px;color:var(--muted)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style>
+
+<style id="print-styles">
+.btn-export {
+  display: flex; align-items: center; gap: 6px;
+  background: #1a6b4a; color: #fff;
+  border: none; border-radius: 7px;
+  padding: 7px 14px; font-size: 12px;
+  font-family: Arial, sans-serif; font-weight: 700;
+  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.1);
+  transition: background .15s; flex-shrink: 0;
+}
+.btn-export:hover { background: #15573c; }
+.btn-export-all {
+  background: #1d4ed8;
+}
+.btn-export-all:hover { background: #1e3a8a; }
+
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html, body { height: auto !important; overflow: visible !important; background: #f0f2f5 !important; }
+  .shell { display: block !important; height: auto !important; }
+  .sidebar { display: none !important; }
+  .topbar { display: flex !important; position: relative !important; grid-column: unset !important; page-break-after: avoid; break-after: avoid; }
+  .btn-export, .controls, .sel-w, .sel { display: none !important; }
+  .main { overflow: visible !important; display: block !important; width: 100% !important; min-width: 0 !important; }
+  .ph { page-break-after: avoid; break-after: avoid; }
+  .cards-wrap { overflow: visible !important; flex: unset !important; height: auto !important; max-height: none !important; }
+  .coop-card { animation: none !important; page-break-inside: avoid; break-inside: avoid; }
+  .period-pill { display: block !important; }
+  @page { size: A4 landscape; margin: 10mm 12mm; }
+}
+</style>
+
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo">HN</div>
+    <div><div class="brand-txt">Ranking Cooperativo Honduras</div><div class="brand-sub">Superintendencia de Cooperativas — CONSUCOOP</div></div>
+  </div>
+  <div class="period-pill" id="periodLabel">Cargando...</div>
+</header>
+<nav class="sidebar">
+  <div class="nav-sec">Rankings</div>
+  <a class="nav-a " href="afiliados.html"><span class="nav-icon">👥</span>Afiliados</a>
+  <a class="nav-a " href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
+  <a class="nav-a " href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
+  <a class="nav-a " href="pasivos.html"><span class="nav-icon">📊</span>Exigibilidades</a>
+  <a class="nav-a " href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
+  <div class="nav-sec">Resultados</div>
+  <a class="nav-a " href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
+  <a class="nav-a " href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
+  <a class="nav-a " href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">Indicadores</div>
+  <a class="nav-a active" href="indicadores.html"><span class="nav-icon">🧮</span>Indicadores Financieros</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">Análisis</div>
+  <a class="nav-a " href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
+  <a class="nav-a " href="crecimiento.html"><span class="nav-icon">📊</span>Crecimiento</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">CAYCSOL</div>
+  <a class="nav-a " href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
+  <div class="nav-footer">Fuente: CONSUCOOP<br><br>📊 Data Analyst<br><strong style="color:var(--accent);font-size:10px">@Ronfilander</strong></div>
+</nav>
+<main class="main">
+  <div class="ph">
+    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 por Activos Netos · 15 indicadores CONSUCOOP por cooperativa</div></div>
+    <div class="controls">
+      <div class="sel-w"><select class="sel" id="selYear"></select></div>
+      <div class="sel-w"><select class="sel" id="selMonth"></select></div>
+    </div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot a">A</span>Óptimo</div>
+    <div class="legend-item"><span class="legend-dot b">B</span>Aceptable</div>
+    <div class="legend-item"><span class="legend-dot c">C</span>Regular</div>
+    <div class="legend-item"><span class="legend-dot d">D</span>Deficiente</div>
+    <div class="legend-item"><span class="legend-dot e">E</span>Crítico</div>
+    <div class="legend-item"><span class="legend-dot na">N/D</span>Sin datos suficientes en la fuente</div>
+  </div>
+  <div class="cards-wrap" id="cardsWrap">
+    <div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div>
+  </div>
+</main>
+</div>
+<script src="data.js"></script>
+<script>
+const MESES={1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'};
+const selYear=document.getElementById('selYear');
+const selMonth=document.getElementById('selMonth');
+
+const GRADE_COLOR={a:'#00A651',b:'#92D050',c:'#FFEB0B',d:'#F2A20C',e:'#FF0000'};
+
+// Los 15 indicadores oficiales de CONSUCOOP (Excel compartido), agrupados en las
+// 6 categorías originales. "computable:false" = no se puede calcular con los
+// datos que trae Balance_General.csv / Estado_de_Resultados.csv (piden detalle
+// por deudor individual, por grupo familiar, o por moneda, que la fuente no trae
+// desglosado). Ahí se muestra N/D en vez de inventar un número.
+const INDICATORS=[
+  {code:'1.1',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',computable:false,group:1},
+  {code:'1.2',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',computable:false,group:1},
+  {code:'1.3',name:'Créditos a Desarrolladores de Vivienda',metaLabel:'≤10% grupo / 5% c/u',computable:false,group:1},
+  {code:'2.1',key:'cobertura',name:'Suficiencia de Provisión para Cartera',metaLabel:'≥100%',meta:100,dir:'desc',computable:true,group:2},
+  {code:'2.2',key:'morosidad',name:'Índice de Morosidad',metaLabel:'≤5%',meta:5,dir:'asc',computable:true,group:2},
+  {code:'2.3',key:'activos_improd',name:'Activos Improductivos',metaLabel:'≤15%',meta:15,dir:'asc',computable:true,group:2},
+  {code:'3.1',key:'capital_inst',name:'Índice de Capital Institucional',metaLabel:'≥8.5%',meta:8.5,dir:'desc',computable:true,group:3},
+  {code:'3.2',key:'patrim_comprometido',name:'Patrimonio Comprometido por Mora >30d',metaLabel:'<80%',meta:80,dir:'asc',computable:true,group:3},
+  {code:'3.3',name:'Índice de Capital Institucional Ajustado',metaLabel:'≥10%',computable:false,group:3},
+  {code:'4.1',key:'cobertura_dep_mn',name:'Cobertura Depósitos Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',computable:true,group:4},
+  {code:'4.2',name:'Cobertura Depósitos Moneda Extranjera',metaLabel:'≥24%',computable:false,group:4},
+  {code:'4.3',name:'Cobertura de Obligaciones de Corto Plazo',metaLabel:'≥110%',computable:false,group:4},
+  {code:'5.1',key:'autosuficiencia',name:'Autosuficiencia Operativa',metaLabel:'≥110%',meta:110,dir:'desc',computable:true,group:5},
+  {code:'5.2',key:'eficiencia_activos',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',computable:true,group:5},
+  {code:'6.1',key:'roa',name:'Rentabilidad sobre Activos Netos Promedio',metaLabel:'≥0.50%',meta:0.5,dir:'desc',computable:true,group:6},
+];
+const GROUPS=[
+  {n:1,name:'1. Límites de Riesgo'},
+  {n:2,name:'2. Calidad de Activos'},
+  {n:3,name:'3. Solvencia'},
+  {n:4,name:'4. Liquidez'},
+  {n:5,name:'5. Gestión Administrativa'},
+  {n:6,name:'6. Rendimientos y Costos'},
+];
+
+function gradeOf(meta,dir,v){
+  if(dir==='desc'){
+    const r=v/meta;
+    if(r>=1.3)return 'a'; if(r>=1.0)return 'b'; if(r>=0.85)return 'c'; if(r>=0.6)return 'd'; return 'e';
+  }else{
+    if(v<=meta*0.5)return 'a'; if(v<=meta)return 'b'; if(v<=meta*1.4)return 'c'; if(v<=meta*2)return 'd'; return 'e';
+  }
+}
+function scoreOf(meta,dir,v){
+  let s;
+  if(dir==='desc'){ s=meta>0?(v/meta*100):0; }
+  else{ s=v>0?(meta/v*100):100; }
+  return Math.max(0,Math.min(100,s));
+}
+function fmtPct(v){
+  if(v===null||v===undefined||isNaN(v))return 'N/D';
+  return v.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
+}
+function fmtM(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
+
+function ringHTML(item,value){
+  if(!item.computable || value===null || value===undefined || isNaN(value)){
+    const why=item.computable
+      ? 'sin datos suficientes en este periodo'
+      : 'no calculable: la fuente no trae el desglose que pide este indicador';
+    return `<div class="ring-wrap" title="${item.code} ${item.name} — ${why}">
+      <div class="ring na"><div class="ring-inner"><div class="ring-val">N/D</div></div></div>
+    </div>`;
+  }
+  const grade=gradeOf(item.meta,item.dir,value);
+  const pct=scoreOf(item.meta,item.dir,value);
+  const color=GRADE_COLOR[grade];
+  return `<div class="ring-wrap" title="${item.code} ${item.name} — Meta ${item.metaLabel} · Valor ${fmtPct(value)}">
+    <div class="ring" style="--pct:${pct};--rc:${color}">
+      <div class="ring-inner">
+        <div class="ring-val">${fmtPct(value)}</div>
+        <div class="ring-grade" style="color:${color}">${grade.toUpperCase()}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+let BAL=[],RES=[],PERIODOS=[],IDX_BAL={},IDX_RES={};
+
+Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,resRaw])=>{
+  BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones',
+    'disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos',
+    'aportaciones','activos_eventuales','cargos_diferidos','propiedad_planta_equipo','inversiones',
+    'depositos_ahorro','dpf']);
+  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm']);
+  PERIODOS=RD.periodos(BAL);
+  IDX_BAL=RD.buildIndex(BAL);
+  IDX_RES=RD.buildIndex(RES);
+  const ultimo=RD.ultimoPeriodo(BAL);
+  const years=[...new Set(PERIODOS.map(p=>p.split('-')[0]))].sort();
+  years.forEach(y=>selYear.add(new Option(y,y)));
+  const[ly,lm]=ultimo.split('-');
+  selYear.value=ly;
+  PERIODOS.filter(p=>p.startsWith(ly)).forEach(p=>{
+    const m=parseInt(p.split('-')[1]);
+    selMonth.add(new Option(MESES[m],m));
+  });
+  selMonth.value=parseInt(lm);
+  selYear.addEventListener('change',onYearChange);
+  selMonth.addEventListener('change',render);
+  render();
+}).catch(e=>{document.getElementById('cardsWrap').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
+
+function onYearChange(){
+  const y=selYear.value;selMonth.innerHTML='';
+  PERIODOS.filter(p=>p.startsWith(y)).forEach(p=>{const m=parseInt(p.split('-')[1]);selMonth.add(new Option(MESES[m],m));});
+  selMonth.value=Math.max(...PERIODOS.filter(p=>p.startsWith(y)).map(p=>parseInt(p.split('-')[1])));
+  render();
+}
+
+function calcIndicadores(b,r){
+  const carteraRiesgo=(b.atrasados||0)+(b.vencidos||0)+(b.demanda_judicial||0);
+  // si la cartera en riesgo suma exactamente 0 mientras SÍ hay préstamos activos,
+  // lo más probable es que el desglose de mora no venga reportado ese mes (pasa
+  // en periodos recientes), no que la cooperativa tenga 0% de mora real.
+  const moraReportada = !(carteraRiesgo===0 && b.prestamos>0);
+  const depMN=(b.depositos_ahorro||0)+(b.dpf||0);
+  const activosProductivos=(b.prestamos||0)+(b.inversiones||0);
+
+  return {
+    coop:b.coop,
+    activos_net:b.activos_net,
+    cobertura: (moraReportada && carteraRiesgo>0) ? (b.provisiones||0)/carteraRiesgo*100 : null,
+    morosidad: (moraReportada && b.prestamos>0) ? carteraRiesgo/b.prestamos*100 : null,
+    activos_improd: b.activos_tot>0 ? ((b.activos_eventuales||0)+(b.cargos_diferidos||0)+(b.propiedad_planta_equipo||0)+carteraRiesgo)/b.activos_tot*100 : null,
+    capital_inst: b.activos_tot>0 ? (b.patrimonio-(b.aportaciones||0))/b.activos_tot*100 : null,
+    patrim_comprometido: (moraReportada && b.patrimonio>0) ? Math.max(0,carteraRiesgo-(b.provisiones||0))/b.patrimonio*100 : null,
+    cobertura_dep_mn: depMN>0 ? (b.disponibilidades||0)/depMN*100 : null,
+    autosuficiencia: (r && r.egresos>0) ? r.ingresos/r.egresos*100 : null,
+    eficiencia_activos: (r && activosProductivos>0) ? r.gast_adm/activosProductivos*100 : null,
+    roa: (r && b.activos_net>0) ? r.excedentes/b.activos_net*100 : null,
+  };
+}
+
+function cardHTML(b,d,rank,maxActivos){
+  const isCay=b.coop.includes('CAYCSOL');
+  const rCls=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
+  const pct=Math.max(b.activos_net/maxActivos*100,1);
+
+  let groups='';
+  GROUPS.forEach(gr=>{
+    const items=INDICATORS.filter(i=>i.group===gr.n);
+    let rings='';
+    items.forEach(it=>{ rings+=ringHTML(it, it.key?d[it.key]:null); });
+    groups+=`<div class="group-block">
+      <div class="group-title">${gr.name}</div>
+      <div class="group-rings">${rings}</div>
+    </div>`;
+  });
+
+  return `<div class="coop-card${isCay?' cay':''}">
+    <div class="card-head">
+      <div class="card-rank ${rCls}">${rank}</div>
+      <div class="card-name${isCay?' cay':''}">${b.coop}</div>
+      <div class="card-activos">
+        <div class="card-activos-val">${fmtM(b.activos_net)}</div>
+        <div class="card-activos-lbl">Activos Netos</div>
+      </div>
+    </div>
+    <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
+    <div class="groups-row">${groups}</div>
+  </div>`;
+}
+
+function render(){
+  const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
+  const balPeriodo = IDX_BAL[p] ? Object.values(IDX_BAL[p]) : [];
+  const resPeriodo = IDX_RES[p] || {};
+  if(!balPeriodo.length) return;
+
+  const[y,m]=p.split('-');
+  document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
+
+  const sorted=[...balPeriodo].sort((a,b)=>b.activos_net-a.activos_net).slice(0,20);
+  const maxActivos=sorted.length?sorted[0].activos_net:1;
+
+  let html='';
+  sorted.forEach((b,i)=>{
+    const d=calcIndicadores(b, resPeriodo[b.coop]);
+    html+=cardHTML(b,d,i+1,maxActivos);
+  });
+  document.getElementById('cardsWrap').innerHTML=html;
+}
+</script>
+
+<script id="export-script">
+(function(){
+  const ALL_PAGES = [
+    'afiliados.html',
+    'activos.html',
+    'cartera.html',
+    'pasivos.html',
+    'aportaciones.html',
+    'ingresos.html',
+    'egresos.html',
+    'excedentes.html',
+    'indicadores.html',
+    'carrera.html',
+    'caycsol_afiliados.html'
+  ];
+
+  function getCurrentPage() {
+    return window.location.pathname.split('/').pop() || 'index.html';
+  }
+
+  function injectButtons() {
+    const topbar = document.querySelector('.topbar');
+    if (!topbar || document.getElementById('btn-export-single')) return;
+
+    const btnSingle = document.createElement('button');
+    btnSingle.id = 'btn-export-single';
+    btnSingle.className = 'btn-export';
+    btnSingle.innerHTML = '⬇ PDF esta página';
+    btnSingle.title = 'Exportar esta vista como PDF';
+    btnSingle.addEventListener('click', () => {
+      const wrap = document.querySelector('.cards-wrap');
+      if (wrap) {
+        wrap.style.overflow = 'visible';
+        wrap.style.maxHeight = 'none';
+        wrap.style.height = 'auto';
+      }
+      setTimeout(() => window.print(), 150);
+    });
+
+    const btnAll = document.createElement('button');
+    btnAll.id = 'btn-export-all';
+    btnAll.className = 'btn-export btn-export-all';
+    btnAll.innerHTML = '📄 PDF completo';
+    btnAll.title = 'Exportar todo el dashboard como PDF';
+    btnAll.addEventListener('click', exportAll);
+
+    topbar.appendChild(btnSingle);
+    topbar.appendChild(btnAll);
+  }
+
+  function exportAll() {
+    const baseUrl = window.location.href.replace(/[^/]*$/, '');
+    const w = window.open('', '_blank', 'width=1200,height=800');
+    if (!w) { alert('Permite ventanas emergentes para exportar el PDF completo.'); return; }
+
+    const pages = ALL_PAGES.map(p => baseUrl + p);
+
+    w.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Ranking Cooperativo Honduras — Completo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f2f5; font-family: Arial, sans-serif; }
+  .cover {
+    width: 100%; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a6b4a, #1d4ed8);
+    color: white; text-align: center;
+    page-break-after: always; break-after: page;
+  }
+  .cover h1 { font-size: 42px; font-weight: 900; margin-bottom: 12px; }
+  .cover p { font-size: 16px; opacity: .85; margin-bottom: 6px; }
+  .frame-page {
+    width: 100%; height: 100vh;
+    page-break-after: always; break-after: page;
+    overflow: hidden; position: relative;
+  }
+  iframe {
+    width: 100%; height: 100%;
+    border: none;
+    transform-origin: top left;
+  }
+  #print-btn {
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    background: #1a6b4a; color: white; border: none;
+    padding: 12px 24px; border-radius: 8px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+  #status {
+    position: fixed; bottom: 24px; left: 24px; z-index: 9999;
+    background: white; border: 1px solid #dde1ea;
+    padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; color: #374151;
+  }
+  @media print {
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    #print-btn, #status { display: none !important; }
+    iframe { pointer-events: none; }
+    @page { size: A4 landscape; margin: 8mm 10mm; }
+  }
+</style>
+</head>
+<body>
+<div class="cover">
+  <h1>🏦 Ranking Cooperativo Honduras</h1>
+  <p>Superintendencia de Cooperativas — CONSUCOOP</p>
+  <p style="opacity:.6;font-size:13px;margin-top:16px">📊 Data Analyst @Ronfilander</p>
+  <p style="opacity:.5;font-size:12px;margin-top:8px">Generado: ${new Date().toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'})}</p>
+</div>
+${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame${i}" onload="frameLoaded(${i})"></iframe></div>`).join('\n')}
+<div id="status">Cargando páginas... (0/${pages.length})</div>
+<button id="print-btn" onclick="window.print()" style="display:none">🖨 Imprimir / Guardar PDF</button>
+<script>
+  let loaded = 0;
+  const total = ${pages.length};
+  function frameLoaded(i) {
+    loaded++;
+    document.getElementById('status').textContent = 'Cargando... (' + loaded + '/' + total + ')';
+    if (loaded === total) {
+      setTimeout(() => {
+        document.getElementById('status').textContent = '✓ Listo para imprimir';
+        document.getElementById('print-btn').style.display = 'block';
+      }, 4000);
+    }
+  }
+  function scaleFrames() {
+    const frames = document.querySelectorAll('iframe');
+    frames.forEach(f => {
+      const container = f.parentElement;
+      const scaleX = container.offsetWidth / 1400;
+      const scaleY = container.offsetHeight / 900;
+      const scale = Math.min(scaleX, scaleY);
+      f.style.width = '1400px';
+      f.style.height = '900px';
+      f.style.transform = 'scale(' + scale + ')';
+    });
+  }
+  scaleFrames();
+  window.addEventListener('resize', scaleFrames);
+<\/script>
+</body>
+</html>`);
+    w.document.close();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectButtons);
+  } else {
+    injectButtons();
+  }
+})();
+</script>
+
+</body>
+</html>
