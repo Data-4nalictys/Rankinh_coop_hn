@@ -255,7 +255,7 @@ function render(){
   if(cay){
     const r=allSorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
-    document.getElementById('kpiSub').textContent=r<=10?'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
+    document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
     document.getElementById('kpiVal').textContent=fmt(cay.ingresos);
     document.getElementById('kpiExtra').textContent=fmt(cay.excedentes);}
   let html='';
@@ -410,7 +410,7 @@ ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame$
     if (loaded === total) {
       // Esperar que los datos carguen desde GitHub
       setTimeout(() => {
-        document.getElementById('status').textContent = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Listo para imprimir';
+        document.getElementById('status').textContent = '✓ Listo para imprimir';
         document.getElementById('print-btn').style.display = 'block';
       }, 4000);
     }

@@ -49,6 +49,17 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .profile-head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;flex-wrap:wrap;gap:10px}
 .profile-name{font-size:20px;font-weight:900;color:var(--text)}
 .profile-name.cay{color:var(--accent)}
+.profile-title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rank-pill{display:flex;align-items:center;gap:8px;background:var(--accent-light);border:1px solid #a7d9c0;border-radius:20px;padding:5px 14px 5px 10px}
+.rank-pill.gold{background:#fff7e6;border-color:#fbd38d}
+.rank-pill.silver{background:#f1f5f9;border-color:#cbd5e1}
+.rank-pill.bronze{background:#fef3e2;border-color:#f6cd9a}
+.rank-pill-num{font-size:18px;font-weight:900;color:var(--accent)}
+.rank-pill.gold .rank-pill-num{color:#d97706}
+.rank-pill.silver .rank-pill-num{color:#64748b}
+.rank-pill.bronze .rank-pill-num{color:#b45309}
+.rank-pill-lbl{font-size:9px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+.rank-pill-lbl b{display:block;font-size:10px;color:var(--text);text-transform:none;letter-spacing:0}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 .sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
 .sel:focus{outline:none;border-color:var(--accent)}
@@ -61,6 +72,11 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .kpi-top{display:flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px}
 .kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .kpi-val{font-size:18px;font-weight:900;color:var(--text)}
+.kpi-rank{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:10px;font-weight:800;color:var(--text2)}
+.kpi-rank .n{color:var(--accent);font-size:11px}
+.kpi-rank.gold{color:#d97706}.kpi-rank.gold .n{color:#d97706}
+.kpi-rank.silver{color:#94a3b8}.kpi-rank.silver .n{color:#94a3b8}
+.kpi-rank.bronze{color:#b45309}.kpi-rank.bronze .n{color:#b45309}
 
 .sec-title{font-size:11px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin:6px 0 8px;display:flex;align-items:center;gap:8px}
 .sec-title .n{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0}
@@ -201,6 +217,18 @@ function fmtInt(n){
   if(n===null||n===undefined||isNaN(n))return 'N/D';
   return Math.round(n).toLocaleString();
 }
+function rankOf(rows,coop,field){
+  const valid=rows.filter(r=>r[field]!==null && r[field]!==undefined && !isNaN(r[field]));
+  const sorted=[...valid].sort((a,b)=>b[field]-a[field]);
+  const idx=sorted.findIndex(r=>r.coop===coop);
+  if(idx<0) return null;
+  return {rank:idx+1, total:sorted.length};
+}
+function rankHTML(r){
+  if(!r) return '';
+  const cls=r.rank===1?'gold':r.rank===2?'silver':r.rank===3?'bronze':'';
+  return `<div class="kpi-rank ${cls}">#<span class="n">${r.rank}</span> de ${r.total}</div>`;
+}
 
 function ringHTML(item,value){
   if(value===null||value===undefined||isNaN(value)){
@@ -312,7 +340,10 @@ function selectCoop(coop){
   const isCay=coop.includes('CAYCSOL');
   document.getElementById('content').innerHTML=`
     <div class="profile-head">
-      <div class="profile-name${isCay?' cay':''}">${coop}</div>
+      <div class="profile-title-row">
+        <div class="profile-name${isCay?' cay':''}">${coop}</div>
+        <div id="rankPillWrap"></div>
+      </div>
       <div class="controls">
         <div class="sel-w"><select class="sel" id="selYear"></select></div>
         <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -350,6 +381,32 @@ function renderProfile(){
   const a=(IDX_AFIL[p]||{})[selected];
   const d=(IDX_IND[p]||{})[selected];
 
+  const balPeriodo=IDX_BAL[p]?Object.values(IDX_BAL[p]):[];
+  const resPeriodo=IDX_RES[p]?Object.values(IDX_RES[p]):[];
+  const afilPeriodo=IDX_AFIL[p]?Object.values(IDX_AFIL[p]):[];
+
+  const rkActivos=rankOf(balPeriodo,selected,'activos_net');
+  const rkCartera=rankOf(balPeriodo,selected,'prestamos');
+  const rkPasivos=rankOf(balPeriodo,selected,'pasivos');
+  const rkAportaciones=rankOf(balPeriodo,selected,'aportaciones');
+  const rkAfiliados=rankOf(afilPeriodo,selected,'total');
+  const rkIngresos=rankOf(resPeriodo,selected,'ingresos');
+  const rkEgresos=rankOf(resPeriodo,selected,'egresos');
+  const rkExcedentes=rankOf(resPeriodo,selected,'excedentes');
+
+  const pillWrap=document.getElementById('rankPillWrap');
+  if(pillWrap){
+    if(rkActivos){
+      const cls=rkActivos.rank===1?'gold':rkActivos.rank===2?'silver':rkActivos.rank===3?'bronze':'';
+      pillWrap.innerHTML=`<div class="rank-pill ${cls}">
+        <div class="rank-pill-num">#${rkActivos.rank}</div>
+        <div class="rank-pill-lbl">de ${rkActivos.total}<b>por Activos Netos</b></div>
+      </div>`;
+    }else{
+      pillWrap.innerHTML='';
+    }
+  }
+
   let groups='';
   GROUPS.forEach(gr=>{
     const items=INDICATORS.filter(i=>i.group===gr.n);
@@ -363,14 +420,14 @@ function renderProfile(){
 
   document.getElementById('profileBody').innerHTML=`
     <div class="kpis">
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="kpi-lbl">Afiliados</span></div><div class="kpi-val">${a?fmtInt(a.total):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg><span class="kpi-lbl">Activos Netos</span></div><div class="kpi-val">${b?fmtM(b.activos_net):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span class="kpi-lbl">Cartera</span></div><div class="kpi-val">${b?fmtM(b.prestamos):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><span class="kpi-lbl">Exigibilidades</span></div><div class="kpi-val">${b?fmtM(b.pasivos):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="kpi-lbl">Aportaciones</span></div><div class="kpi-val">${b?fmtM(b.aportaciones):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="kpi-lbl">Ingresos</span></div><div class="kpi-val">${r?fmtM(r.ingresos):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span class="kpi-lbl">Egresos</span></div><div class="kpi-val">${r?fmtM(r.egresos):'N/D'}</div></div>
-      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></svg><span class="kpi-lbl">Excedentes</span></div><div class="kpi-val">${r?fmtM(r.excedentes):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="kpi-lbl">Afiliados</span></div><div class="kpi-val">${a?fmtInt(a.total):'N/D'}</div>${rankHTML(rkAfiliados)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg><span class="kpi-lbl">Activos Netos</span></div><div class="kpi-val">${b?fmtM(b.activos_net):'N/D'}</div>${rankHTML(rkActivos)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span class="kpi-lbl">Cartera</span></div><div class="kpi-val">${b?fmtM(b.prestamos):'N/D'}</div>${rankHTML(rkCartera)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><span class="kpi-lbl">Exigibilidades</span></div><div class="kpi-val">${b?fmtM(b.pasivos):'N/D'}</div>${rankHTML(rkPasivos)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="kpi-lbl">Aportaciones</span></div><div class="kpi-val">${b?fmtM(b.aportaciones):'N/D'}</div>${rankHTML(rkAportaciones)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="kpi-lbl">Ingresos</span></div><div class="kpi-val">${r?fmtM(r.ingresos):'N/D'}</div>${rankHTML(rkIngresos)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span class="kpi-lbl">Egresos</span></div><div class="kpi-val">${r?fmtM(r.egresos):'N/D'}</div>${rankHTML(rkEgresos)}</div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></svg><span class="kpi-lbl">Excedentes</span></div><div class="kpi-val">${r?fmtM(r.excedentes):'N/D'}</div>${rankHTML(rkExcedentes)}</div>
     </div>
     <div class="sec-title">Indicadores <span class="n">· 15 oficiales CONSUCOOP</span></div>
     <div class="legend">
