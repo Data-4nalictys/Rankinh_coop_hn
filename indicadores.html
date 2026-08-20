@@ -251,8 +251,8 @@ Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados()]).then(([balRaw,r
   BAL=RD.agrupar(balRaw,['activos_tot','activos_net','prestamos','patrimonio','provisiones',
     'disponibilidades','atrasados','vencidos','demanda_judicial','exig_inmediatas','exig_depositos',
     'aportaciones','activos_eventuales','cargos_diferidos','propiedad_planta_equipo','inversiones',
-    'depositos_ahorro','dpf']);
-  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm']);
+    'depositos_ahorro','dpf','depositos_bch','depositos_bancos']);
+  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes','gast_adm','prod_fin','gast_fin']);
   PERIODOS=RD.periodos(BAL);
   IDX_BAL=RD.buildIndex(BAL);
   IDX_RES=RD.buildIndex(RES);
@@ -279,11 +279,22 @@ function onYearChange(){
 }
 
 function calcIndicadores(b,r){
+  // 2.2 Índice de Morosidad = Créditos en mora > 90 días / Total cartera.
+  // "Vencidos" y "Demanda Judicial" son la mora > 90 días; "Atrasados" es
+  // mora temprana (< 90 días) y NO entra en este indicador.
+  const moraMayor90=(b.vencidos||0)+(b.demanda_judicial||0);
+  // 3.2 usa "mora > 30 días": con el desglose disponible (Atrasados/Vencidos/
+  // Demanda Judicial) no se puede aislar el corte exacto de 30 días dentro de
+  // "Atrasados", así que se aproxima con el total de cartera en riesgo.
   const carteraRiesgo=(b.atrasados||0)+(b.vencidos||0)+(b.demanda_judicial||0);
-  // si la cartera en riesgo suma exactamente 0 mientras SÍ hay préstamos activos,
-  // lo más probable es que el desglose de mora no venga reportado ese mes (pasa
-  // en periodos recientes), no que la cooperativa tenga 0% de mora real.
+  // si TODO el desglose de mora viene en blanco ese mes (pasa en periodos
+  // recientes) pero sí hay préstamos activos, es que no se reportó todavía —
+  // no que la cooperativa tenga 0% de mora real.
   const moraReportada = !(carteraRiesgo===0 && b.prestamos>0);
+  // 4.1 "Reservas Líquidas en Moneda Nacional" = disponibilidades en BCH +
+  // bancos del país (no toda la cuenta DISPONIBILIDADES, que puede incluir
+  // otros rubros). "Total Captado en Moneda Nacional" = depósitos de ahorro + DPF.
+  const reservasLiqMN=(b.depositos_bch||0)+(b.depositos_bancos||0);
   const depMN=(b.depositos_ahorro||0)+(b.dpf||0);
   const activosProductivos=(b.prestamos||0)+(b.inversiones||0);
 
@@ -291,12 +302,12 @@ function calcIndicadores(b,r){
     coop:b.coop,
     activos_net:b.activos_net,
     cobertura: (moraReportada && carteraRiesgo>0) ? (b.provisiones||0)/carteraRiesgo*100 : null,
-    morosidad: (moraReportada && b.prestamos>0) ? carteraRiesgo/b.prestamos*100 : null,
-    activos_improd: b.activos_tot>0 ? ((b.activos_eventuales||0)+(b.cargos_diferidos||0)+(b.propiedad_planta_equipo||0)+carteraRiesgo)/b.activos_tot*100 : null,
-    capital_inst: b.activos_tot>0 ? (b.patrimonio-(b.aportaciones||0))/b.activos_tot*100 : null,
-    patrim_comprometido: (moraReportada && b.patrimonio>0) ? Math.max(0,carteraRiesgo-(b.provisiones||0))/b.patrimonio*100 : null,
-    cobertura_dep_mn: depMN>0 ? (b.disponibilidades||0)/depMN*100 : null,
-    autosuficiencia: (r && r.egresos>0) ? r.ingresos/r.egresos*100 : null,
+    morosidad: (moraReportada && b.prestamos>0) ? moraMayor90/b.prestamos*100 : null,
+    activos_improd: b.activos_net>0 ? ((b.activos_eventuales||0)+(b.cargos_diferidos||0)+(b.propiedad_planta_equipo||0)+carteraRiesgo)/b.activos_net*100 : null,
+    capital_inst: b.activos_net>0 ? (b.patrimonio-(b.aportaciones||0))/b.activos_net*100 : null,
+    patrim_comprometido: (moraReportada && b.patrimonio>0) ? carteraRiesgo/b.patrimonio*100 : null,
+    cobertura_dep_mn: depMN>0 ? reservasLiqMN/depMN*100 : null,
+    autosuficiencia: (r && (r.gast_fin+r.gast_adm)>0) ? r.prod_fin/(r.gast_fin+r.gast_adm)*100 : null,
     eficiencia_activos: (r && activosProductivos>0) ? r.gast_adm/activosProductivos*100 : null,
     roa: (r && b.activos_net>0) ? r.excedentes/b.activos_net*100 : null,
   };
