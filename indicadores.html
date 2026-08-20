@@ -60,7 +60,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .group-title{font-size:9px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
 .group-rings{display:flex;gap:8px;flex-wrap:wrap}
 
-.ring-wrap{display:flex;align-items:center;justify-content:center}
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.ring-code{font-size:8px;font-weight:800;color:var(--text2);text-align:center}
 .ring{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:relative;background:conic-gradient(var(--rc,#9ca3af) calc(var(--pct,0)*1%), var(--surface2) 0)}
 .ring-inner{position:absolute;inset:6px;background:var(--surface);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
 .ring-val{font-size:9px;font-weight:900;color:var(--text)}
@@ -227,6 +228,7 @@ function ringHTML(item,value){
       : 'no calculable: la fuente no trae el desglose que pide este indicador';
     return `<div class="ring-wrap" title="${item.code} ${item.name} — ${why}">
       <div class="ring na"><div class="ring-inner"><div class="ring-val">N/D</div></div></div>
+      <div class="ring-code">${item.code}</div>
     </div>`;
   }
   const grade=gradeOf(item.meta,item.dir,value);
@@ -239,6 +241,7 @@ function ringHTML(item,value){
         <div class="ring-grade" style="color:${color}">${grade.toUpperCase()}</div>
       </div>
     </div>
+    <div class="ring-code">${item.code}</div>
   </div>`;
 }
 
