@@ -31,7 +31,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .sel:focus{outline:none;border-color:var(--accent)}
 .sel-w{position:relative;display:inline-block}
 .sel-w::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:9px}
-.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 20px 10px;flex-shrink:0}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;padding:0 20px 10px;flex-shrink:0}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:10px 14px;box-shadow:var(--sh)}
 .kpi-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px}
@@ -218,6 +219,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
     <div class="kpi kpi-cay"><div class="kpi-lbl">CAYCSOL — Posición</div><div class="kpi-val" id="kpiRank">—</div><div class="kpi-sub" id="kpiSub">—</div></div>
     <div class="kpi"><div class="kpi-lbl">Activos CAYCSOL</div><div class="kpi-val" id="kpiVal">—</div><div class="kpi-sub">En millones</div></div>
     <div class="kpi"><div class="kpi-lbl" id="kpiGapLbl">Brecha al Top 10</div><div class="kpi-val" id="kpiGap">—</div><div class="kpi-sub" id="kpiGapSub">—</div></div>
+    <div class="kpi" id="kpiUpCard"><div class="kpi-lbl">Brecha con #—</div><div class="kpi-val" id="kpiUp">—</div><div class="kpi-sub" id="kpiUpSub">—</div></div>
     <div class="kpi"><div class="kpi-lbl">Total sistema</div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-sub">Sistema Cooperativo</div></div>
   </div>
   <div class="tbl-wrap">
@@ -299,6 +301,18 @@ function render(){
         document.getElementById('kpiGap').textContent='Top 10';
         document.getElementById('kpiGapSub').textContent='Objetivo logrado';
       }
+    }
+
+    // Brecha con la cooperativa justo arriba en el ranking (la #r-1)
+    const above=r>1?allSorted[r-2]:null;
+    if(above){
+      document.getElementById('kpiUpCard').querySelector('.kpi-lbl').textContent='Brecha con #'+(r-1);
+      document.getElementById('kpiUp').textContent=fmt(above.activos_net-cay.activos_net);
+      document.getElementById('kpiUpSub').textContent='Para alcanzar: '+above.coop;
+    }else{
+      document.getElementById('kpiUpCard').querySelector('.kpi-lbl').textContent='Brecha con #1';
+      document.getElementById('kpiUp').textContent='—';
+      document.getElementById('kpiUpSub').textContent='Ya es #1 del sistema';
     }
   }
   let html='';
