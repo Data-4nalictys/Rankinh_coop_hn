@@ -250,6 +250,12 @@ async function loadBalanceGeneral() {
 
       dpf:
         toNum(r['DPF hn']),
+
+      depositos_bch:
+        toNum(r['Depositos BCH hn']),
+
+      depositos_bancos:
+        toNum(r['Depositos Bancos hn']),
     }));
 }
 
