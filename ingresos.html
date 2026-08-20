@@ -16,7 +16,8 @@
 .nav-sec{padding:10px 14px 3px;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}.nav-sec:first-child{padding-top:0}
 .nav-a{display:flex;align-items:center;gap:7px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--text2);text-decoration:none;border-left:3px solid transparent;transition:.1s}
 .nav-a:hover{color:var(--text);background:var(--bg)}.nav-a.active{color:var(--accent);background:var(--accent-light);border-left-color:var(--accent)}
-.nav-icon{width:15px;text-align:center;font-size:12px}.nav-sep{height:1px;background:var(--border);margin:8px 14px}
+.nav-icon{width:15px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.nav-icon svg{display:block}.nav-sep{height:1px;background:var(--border);margin:8px 14px}
 .nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
 .main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
 .ph{padding:14px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
@@ -163,26 +164,30 @@
 </header>
 <nav class="sidebar">
   <div class="nav-sec">Rankings</div>
-  <a class="nav-a " href="afiliados.html"><span class="nav-icon">👥</span>Afiliados</a>
-  <a class="nav-a " href="activos.html"><span class="nav-icon">🏦</span>Activos Netos</a>
-  <a class="nav-a " href="cartera.html"><span class="nav-icon">💳</span>Cartera</a>
-  <a class="nav-a " href="pasivos.html"><span class="nav-icon">📊</span>Exigibilidades</a>
-  <a class="nav-a " href="aportaciones.html"><span class="nav-icon">🤝</span>Aportaciones</a>
+  <a class="nav-a " href="afiliados.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Afiliados</a>
+  <a class="nav-a " href="activos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></span>Activos Netos</a>
+  <a class="nav-a " href="cartera.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>Cartera</a>
+  <a class="nav-a " href="pasivos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>Exigibilidades</a>
+  <a class="nav-a " href="aportaciones.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></span>Aportaciones</a>
   <div class="nav-sec">Resultados</div>
-  <a class="nav-a active" href="ingresos.html"><span class="nav-icon">📈</span>Ingresos</a>
-  <a class="nav-a " href="egresos.html"><span class="nav-icon">📉</span>Egresos</a>
-  <a class="nav-a " href="excedentes.html"><span class="nav-icon">💰</span>Excedentes</a>
+  <a class="nav-a active" href="ingresos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>Ingresos</a>
+  <a class="nav-a " href="egresos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></span>Egresos</a>
+  <a class="nav-a " href="excedentes.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="M16.71 13.88.7.71-.71.71"/></svg></span>Excedentes</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Indicadores</div>
-  <a class="nav-a " href="indicadores.html"><span class="nav-icon">🧮</span>Indicadores Financieros</a>
+  <a class="nav-a " href="indicadores.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg></span>Indicadores Financieros</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
-  <a class="nav-a " href="carrera.html"><span class="nav-icon">🏁</span>Carrera por el Top</a>
-  <a class="nav-a " href="crecimiento.html"><span class="nav-icon">📊</span>Crecimiento</a>
+  <a class="nav-a " href="carrera.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span>Carrera por el Top</a>
+  <a class="nav-a " href="crecimiento.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>Crecimiento</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">CAYCSOL</div>
-  <a class="nav-a " href="caycsol_afiliados.html"><span class="nav-icon">🌱</span>Evolución Afiliados</a>
-  <div class="nav-footer">Fuente: CONSUCOOP<br><br>📊 Data Analyst<br><strong style="color:var(--accent);font-size:10px">@Ronfilander</strong></div>
+  <a class="nav-a " href="caycsol_afiliados.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c0-6 1-8 1-8"/><path d="M12 12c0-3-2-5-6-5 0 4 2 5 6 5z"/><path d="M13 12c0-4 2-6 6-6 0 4-2 6-6 6z"/></svg></span>Evolución Afiliados</a>
+  <div class="nav-sep"></div>
+  <div class="nav-sec">Buscar</div>
+  <a class="nav-a " href="cooperativa.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Buscar Cooperativa</a>
+
+  <div class="nav-footer">Fuente: CONSUCOOP<br><br>Data Analyst<br><strong style="color:var(--accent);font-size:10px">@Ronfilander</strong></div>
 </nav>
 <main class="main">
   <div class="ph">
@@ -250,7 +255,7 @@ function render(){
   if(cay){
     const r=allSorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
-    document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
+    document.getElementById('kpiSub').textContent=r<=10?'<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
     document.getElementById('kpiVal').textContent=fmt(cay.ingresos);
     document.getElementById('kpiExtra').textContent=fmt(cay.excedentes);}
   let html='';
@@ -287,7 +292,8 @@ function render(){
     'excedentes.html',
     'indicadores.html',
     'carrera.html',
-    'caycsol_afiliados.html'
+    'caycsol_afiliados.html',
+    'cooperativa.html'
   ];
 
   function getCurrentPage() {
@@ -302,7 +308,7 @@ function render(){
     const btnSingle = document.createElement('button');
     btnSingle.id = 'btn-export-single';
     btnSingle.className = 'btn-export';
-    btnSingle.innerHTML = '⬇ PDF esta página';
+    btnSingle.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF esta página';
     btnSingle.title = 'Exportar esta vista como PDF';
     btnSingle.addEventListener('click', () => {
       // Expandir tabla antes de imprimir
@@ -319,7 +325,7 @@ function render(){
     const btnAll = document.createElement('button');
     btnAll.id = 'btn-export-all';
     btnAll.className = 'btn-export btn-export-all';
-    btnAll.innerHTML = '📄 PDF completo';
+    btnAll.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> PDF completo';
     btnAll.title = 'Exportar todo el dashboard como PDF';
     btnAll.addEventListener('click', exportAll);
 
@@ -389,12 +395,12 @@ function render(){
 <div class="cover">
   <h1>🏦 Ranking Cooperativo Honduras</h1>
   <p>Superintendencia de Cooperativas — CONSUCOOP</p>
-  <p style="opacity:.6;font-size:13px;margin-top:16px">📊 Data Analyst @Ronfilander</p>
+  <p style="opacity:.6;font-size:13px;margin-top:16px">Data Analyst @Ronfilander</p>
   <p style="opacity:.5;font-size:12px;margin-top:8px">Generado: ${new Date().toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'})}</p>
 </div>
 ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame${i}" onload="frameLoaded(${i})"></iframe></div>`).join('\n')}
 <div id="status">Cargando páginas... (0/${pages.length})</div>
-<button id="print-btn" onclick="window.print()" style="display:none">🖨 Imprimir / Guardar PDF</button>
+<button id="print-btn" onclick="window.print()" style="display:none"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir / Guardar PDF</button>
 <script>
   let loaded = 0;
   const total = ${pages.length};
@@ -404,7 +410,7 @@ ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame$
     if (loaded === total) {
       // Esperar que los datos carguen desde GitHub
       setTimeout(() => {
-        document.getElementById('status').textContent = '✓ Listo para imprimir';
+        document.getElementById('status').textContent = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Listo para imprimir';
         document.getElementById('print-btn').style.display = 'block';
       }, 4000);
     }

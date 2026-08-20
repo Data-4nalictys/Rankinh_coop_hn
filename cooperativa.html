@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ranking HN — Indicadores Financieros</title>
+<title>Ranking HN — Buscar Cooperativa</title>
 <style>
 :root{--bg:#f0f2f5;--surface:#fff;--surface2:#f5f6f8;--border:#dde1ea;--accent:#1a6b4a;--accent-light:#eaf7f1;--text:#111827;--text2:#6b7280;--muted:#9ca3af;--sh:0 1px 3px rgba(0,0,0,.06)}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -24,40 +24,56 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .nav-sep{height:1px;background:var(--border);margin:8px 14px}
 .nav-footer{margin-top:auto;padding:10px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.7}
 .main{overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.ph{padding:12px 20px 10px;display:flex;align-items:flex-end;justify-content:space-between;flex-shrink:0;flex-wrap:wrap;gap:8px}
-.ph-title{font-size:18px;font-weight:900;color:var(--text)}.ph-sub{font-size:10px;color:var(--muted);margin-top:2px}
+
+.search-bar{padding:14px 20px 10px;flex-shrink:0}
+.search-wrap{position:relative;max-width:520px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);display:flex}
+.search-input{width:100%;height:42px;padding:0 14px 0 38px;border:1px solid var(--border);border-radius:10px;font-size:14px;font-family:Arial,sans-serif;background:var(--surface);box-shadow:var(--sh);color:var(--text)}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.search-drop{position:absolute;top:46px;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:280px;overflow-y:auto;z-index:20;display:none}
+.search-drop.show{display:block}
+.search-item{padding:10px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer;border-bottom:1px solid var(--surface2)}
+.search-item:last-child{border-bottom:none}
+.search-item:hover,.search-item.hi{background:var(--accent-light);color:var(--accent)}
+.search-item .mark{color:var(--accent)}
+.search-empty{padding:14px;font-size:12px;color:var(--muted);text-align:center}
+
+.content{flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--muted);gap:10px;text-align:center}
+.empty-state .ic{color:var(--border)}
+.empty-state p{font-size:13px;max-width:280px}
+
+.profile-head{display:flex;align-items:center;justify-content:space-between;padding:6px 0 14px;flex-wrap:wrap;gap:10px}
+.profile-name{font-size:20px;font-weight:900;color:var(--text)}
+.profile-name.cay{color:var(--accent)}
 .controls{display:flex;gap:6px;flex-wrap:wrap}
 .sel{appearance:none;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:6px 24px 6px 10px;border-radius:7px;font-size:12px;font-family:Arial,sans-serif;font-weight:700;cursor:pointer;box-shadow:var(--sh)}
 .sel:focus{outline:none;border-color:var(--accent)}
 .sel-w{position:relative;display:inline-block}
 .sel-w::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--muted);font-size:9px}
 
-.legend{display:flex;align-items:center;gap:10px;padding:0 20px 10px;flex-shrink:0;flex-wrap:wrap}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;box-shadow:var(--sh)}
+.kpi-top{display:flex;align-items:center;gap:6px;color:var(--muted);margin-bottom:6px}
+.kpi-lbl{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.kpi-val{font-size:18px;font-weight:900;color:var(--text)}
+
+.sec-title{font-size:11px;font-weight:900;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin:6px 0 8px;display:flex;align-items:center;gap:8px}
+.sec-title .n{color:var(--muted);font-weight:700;text-transform:none;letter-spacing:0}
+
+.legend{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--text2)}
 .legend-dot{width:14px;height:14px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff}
 .legend-dot.a{background:#00A651}.legend-dot.b{background:#92D050;color:#3a5c14}.legend-dot.c{background:#FFEB0B;color:#7a6a00}.legend-dot.d{background:#F2A20C}.legend-dot.e{background:#FF0000}
 .legend-dot.na{background:var(--surface2);border:2px dashed var(--border);color:var(--muted)}
 
-.cards-wrap{flex:1;overflow-y:auto;padding:0 20px 20px;scrollbar-width:thin;scrollbar-color:#dde1ea transparent}
-.cards-wrap::-webkit-scrollbar{width:6px}
-.cards-wrap::-webkit-scrollbar-thumb{background:#dde1ea;border-radius:4px}
-
-.coop-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:12px;box-shadow:var(--sh);animation:fu .18s ease both}
-.coop-card.cay{border-color:#a7d9c0;background:linear-gradient(135deg,#f8fdfa,var(--accent-light))}
-
-.card-head{display:flex;align-items:center;gap:12px}
-.card-rank{font-size:20px;font-weight:900;color:var(--muted);width:30px;text-align:center;flex-shrink:0}
-.card-rank.gold{color:#d97706}.card-rank.silver{color:#94a3b8}.card-rank.bronze{color:#b45309}
-.card-name{font-size:15px;font-weight:900;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card-name.cay{color:var(--accent)}
-.card-activos{text-align:right;flex-shrink:0}
-.card-activos-val{font-size:16px;font-weight:900;color:var(--text)}
-.card-activos-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.card-bar{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:8px 0 12px}
-.card-bar-fill{height:100%;background:linear-gradient(90deg,#1e40af,#3b82f6);border-radius:3px;transition:width .4s ease}
-
-.groups-row{display:flex;flex-wrap:wrap;gap:16px 22px;padding-top:10px;border-top:1px solid var(--border)}
-.group-block{min-width:160px}
+.groups-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;box-shadow:var(--sh);margin-bottom:20px}
+.groups-row{display:flex;flex-wrap:wrap;gap:18px 26px}
+.group-block{min-width:150px}
 .group-title{font-size:9px;font-weight:900;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
 .group-rings{display:flex;gap:8px;flex-wrap:wrap}
 
@@ -71,44 +87,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .ring.na .ring-inner{background:transparent;inset:0}
 .ring.na .ring-val{font-size:8.5px;color:var(--muted);font-weight:800}
 
-.loading{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:12px;color:var(--muted)}
+.loading{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:12px;color:var(--muted)}
 .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.kpi,.groups-card{animation:fu .18s ease both}
 </style>
-
-<style id="print-styles">
-.btn-export {
-  display: flex; align-items: center; gap: 6px;
-  background: #1a6b4a; color: #fff;
-  border: none; border-radius: 7px;
-  padding: 7px 14px; font-size: 12px;
-  font-family: Arial, sans-serif; font-weight: 700;
-  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.1);
-  transition: background .15s; flex-shrink: 0;
-}
-.btn-export:hover { background: #15573c; }
-.btn-export-all {
-  background: #1d4ed8;
-}
-.btn-export-all:hover { background: #1e3a8a; }
-
-@media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  html, body { height: auto !important; overflow: visible !important; background: #f0f2f5 !important; }
-  .shell { display: block !important; height: auto !important; }
-  .sidebar { display: none !important; }
-  .topbar { display: flex !important; position: relative !important; grid-column: unset !important; page-break-after: avoid; break-after: avoid; }
-  .btn-export, .controls, .sel-w, .sel { display: none !important; }
-  .main { overflow: visible !important; display: block !important; width: 100% !important; min-width: 0 !important; }
-  .ph { page-break-after: avoid; break-after: avoid; }
-  .cards-wrap { overflow: visible !important; flex: unset !important; height: auto !important; max-height: none !important; }
-  .coop-card { animation: none !important; page-break-inside: avoid; break-inside: avoid; }
-  .period-pill { display: block !important; }
-  @page { size: A4 landscape; margin: 10mm 12mm; }
-}
-</style>
-
 </head>
 <body>
 <div class="shell">
@@ -129,10 +113,10 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <div class="nav-sec">Resultados</div>
   <a class="nav-a " href="ingresos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>Ingresos</a>
   <a class="nav-a " href="egresos.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg></span>Egresos</a>
-  <a class="nav-a " href="excedentes.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="M16.71 13.88.7.71-.71.71"/></svg></span>Excedentes</a>
+  <a class="nav-a " href="excedentes.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></svg></span>Excedentes</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Indicadores</div>
-  <a class="nav-a active" href="indicadores.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg></span>Indicadores Financieros</a>
+  <a class="nav-a " href="indicadores.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/></svg></span>Indicadores Financieros</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Análisis</div>
   <a class="nav-a " href="carrera.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></span>Carrera por el Top</a>
@@ -142,42 +126,30 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
   <a class="nav-a " href="caycsol_afiliados.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c0-6 1-8 1-8"/><path d="M12 12c0-3-2-5-6-5 0 4 2 5 6 5z"/><path d="M13 12c0-4 2-6 6-6 0 4-2 6-6 6z"/></svg></span>Evolución Afiliados</a>
   <div class="nav-sep"></div>
   <div class="nav-sec">Buscar</div>
-  <a class="nav-a " href="cooperativa.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Buscar Cooperativa</a>
-
+  <a class="nav-a active" href="cooperativa.html"><span class="nav-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Buscar Cooperativa</a>
   <div class="nav-footer">Fuente: CONSUCOOP<br><br>Data Analyst<br><strong style="color:var(--accent);font-size:10px">@Ronfilander</strong></div>
 </nav>
 <main class="main">
-  <div class="ph">
-    <div><div class="ph-title">Indicadores Financieros</div><div class="ph-sub">Top 20 por Activos Netos · 15 indicadores oficiales CONSUCOOP</div></div>
-    <div class="controls">
-      <div class="sel-w"><select class="sel" id="selYear"></select></div>
-      <div class="sel-w"><select class="sel" id="selMonth"></select></div>
+  <div class="search-bar">
+    <div class="search-wrap">
+      <span class="search-icon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <input class="search-input" id="searchInput" placeholder="Buscar cualquier cooperativa..." autocomplete="off">
+      <div class="search-drop" id="searchDrop"></div>
     </div>
   </div>
-  <div class="legend">
-    <div class="legend-item"><span class="legend-dot a">A</span>Óptimo</div>
-    <div class="legend-item"><span class="legend-dot b">B</span>Aceptable</div>
-    <div class="legend-item"><span class="legend-dot c">C</span>Regular</div>
-    <div class="legend-item"><span class="legend-dot d">D</span>Deficiente</div>
-    <div class="legend-item"><span class="legend-dot e">E</span>Crítico</div>
-    <div class="legend-item"><span class="legend-dot na">N/D</span>Sin datos suficientes en la fuente</div>
-  </div>
-  <div class="cards-wrap" id="cardsWrap">
-    <div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div>
+  <div class="content" id="content">
+    <div class="empty-state">
+      <span class="ic"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="18" x2="15" y2="18"/></svg></span>
+      <p>Busca el nombre de cualquier cooperativa para ver toda su información: afiliados, activos, cartera, resultados y los 15 indicadores CONSUCOOP.</p>
+    </div>
   </div>
 </main>
 </div>
 <script src="data.js"></script>
 <script>
 const MESES={1:'Enero',2:'Febrero',3:'Marzo',4:'Abril',5:'Mayo',6:'Junio',7:'Julio',8:'Agosto',9:'Septiembre',10:'Octubre',11:'Noviembre',12:'Diciembre'};
-const selYear=document.getElementById('selYear');
-const selMonth=document.getElementById('selMonth');
-
 const GRADE_COLOR={a:'#00A651',b:'#92D050',c:'#FFEB0B',d:'#F2A20C',e:'#FF0000'};
 
-// Los 15 indicadores oficiales de CONSUCOOP, con los valores YA CALCULADOS
-// por ellos mismos (hoja "INDICADORES FINANCIEROS" de su Excel mensual,
-// cargados vía data/Indicadores.csv). Ya no se recalculan aproximaciones acá.
 const INDICATORS=[
   {code:'1.1',key:'LIMITE_DEUDOR',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',meta:7.5,dir:'asc',group:1},
   {code:'1.2',key:'CONCENTRACION_FAMILIAR',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',meta:10,dir:'asc',group:1},
@@ -214,18 +186,24 @@ function gradeOf(meta,dir,v){
 }
 function scoreOf(meta,dir,v){
   let s;
-  if(dir==='desc'){ s=meta>0?(v/meta*100):0; }
-  else{ s=v>0?(meta/v*100):100; }
+  if(dir==='desc'){ s=meta>0?(v/meta*100):0; } else { s=v>0?(meta/v*100):100; }
   return Math.max(0,Math.min(100,s));
 }
 function fmtPct(v){
   if(v===null||v===undefined||isNaN(v))return 'N/D';
   return v.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+'%';
 }
-function fmtM(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
+function fmtM(n){
+  if(n===null||n===undefined||isNaN(n))return 'N/D';
+  return 'L '+(n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';
+}
+function fmtInt(n){
+  if(n===null||n===undefined||isNaN(n))return 'N/D';
+  return Math.round(n).toLocaleString();
+}
 
 function ringHTML(item,value){
-  if(value===null || value===undefined || isNaN(value)){
+  if(value===null||value===undefined||isNaN(value)){
     return `<div class="ring-wrap" title="${item.code} ${item.name} — sin dato en la fuente oficial de CONSUCOOP para este periodo">
       <div class="ring na"><div class="ring-inner"><div class="ring-val">N/D</div></div></div>
       <div class="ring-code">${item.code}</div>
@@ -245,40 +223,132 @@ function ringHTML(item,value){
   </div>`;
 }
 
-let BAL=[],IND=[],PERIODOS=[],IDX_BAL={},IDX_IND={};
+let BAL=[],RES=[],IND=[],AFIL=[],PERIODOS=[];
+let IDX_BAL={},IDX_RES={},IDX_IND={},IDX_AFIL={};
+let COOPS=[];
+let selected=null;
+let selYear=null, selMonth=null;
 
-Promise.all([RD.loadBalanceGeneral(),RD.loadIndicadoresOficial()]).then(([balRaw,indRaw])=>{
-  BAL=RD.agrupar(balRaw,['activos_net']);
-  IND=indRaw; // ya viene 1 fila por cooperativa+periodo, no hace falta agrupar
+Promise.all([RD.loadBalanceGeneral(),RD.loadEstadoResultados(),RD.loadIndicadoresOficial(),RD.loadAfiliados()])
+.then(([balRaw,resRaw,indRaw,afilRaw])=>{
+  BAL=RD.agrupar(balRaw,['activos_net','activos_tot','prestamos','pasivos','patrimonio','aportaciones']);
+  RES=RD.agrupar(resRaw,['ingresos','egresos','excedentes']);
+  IND=indRaw;
+  AFIL=RD.agrupar(afilRaw,['total','hombres','mujeres','menores','juridicas']);
   PERIODOS=RD.periodos(BAL);
   IDX_BAL=RD.buildIndex(BAL);
+  IDX_RES=RD.buildIndex(RES);
   IDX_IND=RD.buildIndex(IND);
+  IDX_AFIL=RD.buildIndex(AFIL);
+
+  const set=new Set();
+  BAL.forEach(r=>set.add(r.coop));
+  AFIL.forEach(r=>set.add(r.coop));
+  COOPS=[...set].sort();
+
   const ultimo=RD.ultimoPeriodo(BAL);
-  const years=[...new Set(PERIODOS.map(p=>p.split('-')[0]))].sort();
+  const[ly,lm]=ultimo.split('-');
+  document.getElementById('periodLabel').textContent=MESES[parseInt(lm)]+' '+ly;
+
+  setupSearch();
+}).catch(e=>{document.getElementById('content').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
+
+function setupSearch(){
+  const input=document.getElementById('searchInput');
+  const drop=document.getElementById('searchDrop');
+  let hiIdx=-1;
+
+  function renderMatches(q){
+    const query=q.trim().toUpperCase();
+    if(!query){ drop.classList.remove('show'); return; }
+    const matches=COOPS.filter(c=>c.toUpperCase().includes(query)).slice(0,8);
+    hiIdx=-1;
+    if(!matches.length){
+      drop.innerHTML='<div class="search-empty">Sin coincidencias</div>';
+    }else{
+      drop.innerHTML=matches.map((c,i)=>{
+        const idx=c.toUpperCase().indexOf(query);
+        const marked=c.slice(0,idx)+'<span class="mark">'+c.slice(idx,idx+query.length)+'</span>'+c.slice(idx+query.length);
+        return `<div class="search-item" data-name="${c.replace(/"/g,'&quot;')}">${marked}</div>`;
+      }).join('');
+    }
+    drop.classList.add('show');
+  }
+
+  input.addEventListener('input',()=>renderMatches(input.value));
+  input.addEventListener('focus',()=>{ if(input.value.trim()) renderMatches(input.value); });
+  document.addEventListener('click',(e)=>{
+    if(!e.target.closest('.search-wrap')) drop.classList.remove('show');
+  });
+  drop.addEventListener('click',(e)=>{
+    const item=e.target.closest('.search-item[data-name]');
+    if(item){
+      input.value=item.dataset.name;
+      drop.classList.remove('show');
+      selectCoop(item.dataset.name);
+    }
+  });
+  input.addEventListener('keydown',(e)=>{
+    const items=[...drop.querySelectorAll('.search-item[data-name]')];
+    if(!items.length) return;
+    if(e.key==='ArrowDown'){ e.preventDefault(); hiIdx=Math.min(hiIdx+1,items.length-1); }
+    else if(e.key==='ArrowUp'){ e.preventDefault(); hiIdx=Math.max(hiIdx-1,0); }
+    else if(e.key==='Enter'){
+      e.preventDefault();
+      const pick=hiIdx>=0?items[hiIdx]:items[0];
+      if(pick){ input.value=pick.dataset.name; drop.classList.remove('show'); selectCoop(pick.dataset.name); }
+      return;
+    }else return;
+    items.forEach((it,i)=>it.classList.toggle('hi',i===hiIdx));
+  });
+}
+
+function selectCoop(coop){
+  selected=coop;
+  const periodosCoop=BAL.filter(r=>r.coop===coop).map(r=>r.periodo).sort();
+  const ultimo=periodosCoop.length?periodosCoop[periodosCoop.length-1]:RD.ultimoPeriodo(BAL);
+  const years=[...new Set(periodosCoop.map(p=>p.split('-')[0]))];
+
+  const isCay=coop.includes('CAYCSOL');
+  document.getElementById('content').innerHTML=`
+    <div class="profile-head">
+      <div class="profile-name${isCay?' cay':''}">${coop}</div>
+      <div class="controls">
+        <div class="sel-w"><select class="sel" id="selYear"></select></div>
+        <div class="sel-w"><select class="sel" id="selMonth"></select></div>
+      </div>
+    </div>
+    <div id="profileBody"></div>
+  `;
+
+  selYear=document.getElementById('selYear');
+  selMonth=document.getElementById('selMonth');
   years.forEach(y=>selYear.add(new Option(y,y)));
   const[ly,lm]=ultimo.split('-');
   selYear.value=ly;
-  PERIODOS.filter(p=>p.startsWith(ly)).forEach(p=>{
+  periodosCoop.filter(p=>p.startsWith(ly)).forEach(p=>{
     const m=parseInt(p.split('-')[1]);
     selMonth.add(new Option(MESES[m],m));
   });
   selMonth.value=parseInt(lm);
-  selYear.addEventListener('change',onYearChange);
-  selMonth.addEventListener('change',render);
-  render();
-}).catch(e=>{document.getElementById('cardsWrap').innerHTML='<div class="loading"><span>Error: '+e.message+'</span></div>';});
 
-function onYearChange(){
-  const y=selYear.value;selMonth.innerHTML='';
-  PERIODOS.filter(p=>p.startsWith(y)).forEach(p=>{const m=parseInt(p.split('-')[1]);selMonth.add(new Option(MESES[m],m));});
-  selMonth.value=Math.max(...PERIODOS.filter(p=>p.startsWith(y)).map(p=>parseInt(p.split('-')[1])));
-  render();
+  selYear.addEventListener('change',()=>{
+    const y=selYear.value; selMonth.innerHTML='';
+    periodosCoop.filter(p=>p.startsWith(y)).forEach(p=>{const m=parseInt(p.split('-')[1]);selMonth.add(new Option(MESES[m],m));});
+    selMonth.value=Math.max(...periodosCoop.filter(p=>p.startsWith(y)).map(p=>parseInt(p.split('-')[1])));
+    renderProfile();
+  });
+  selMonth.addEventListener('change',renderProfile);
+
+  renderProfile();
 }
 
-function cardHTML(b,d,rank,maxActivos){
-  const isCay=b.coop.includes('CAYCSOL');
-  const rCls=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
-  const pct=Math.max(b.activos_net/maxActivos*100,1);
+function renderProfile(){
+  const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
+  const b=(IDX_BAL[p]||{})[selected];
+  const r=(IDX_RES[p]||{})[selected];
+  const a=(IDX_AFIL[p]||{})[selected];
+  const d=(IDX_IND[p]||{})[selected];
 
   let groups='';
   GROUPS.forEach(gr=>{
@@ -291,42 +361,32 @@ function cardHTML(b,d,rank,maxActivos){
     </div>`;
   });
 
-  return `<div class="coop-card${isCay?' cay':''}">
-    <div class="card-head">
-      <div class="card-rank ${rCls}">${rank}</div>
-      <div class="card-name${isCay?' cay':''}">${b.coop}</div>
-      <div class="card-activos">
-        <div class="card-activos-val">${fmtM(b.activos_net)}</div>
-        <div class="card-activos-lbl">Activos Netos</div>
-      </div>
+  document.getElementById('profileBody').innerHTML=`
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="kpi-lbl">Afiliados</span></div><div class="kpi-val">${a?fmtInt(a.total):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg><span class="kpi-lbl">Activos Netos</span></div><div class="kpi-val">${b?fmtM(b.activos_net):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span class="kpi-lbl">Cartera</span></div><div class="kpi-val">${b?fmtM(b.prestamos):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg><span class="kpi-lbl">Exigibilidades</span></div><div class="kpi-val">${b?fmtM(b.pasivos):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg><span class="kpi-lbl">Aportaciones</span></div><div class="kpi-val">${b?fmtM(b.aportaciones):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="kpi-lbl">Ingresos</span></div><div class="kpi-val">${r?fmtM(r.ingresos):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg><span class="kpi-lbl">Egresos</span></div><div class="kpi-val">${r?fmtM(r.egresos):'N/D'}</div></div>
+      <div class="kpi"><div class="kpi-top"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/></svg><span class="kpi-lbl">Excedentes</span></div><div class="kpi-val">${r?fmtM(r.excedentes):'N/D'}</div></div>
     </div>
-    <div class="card-bar"><div class="card-bar-fill" style="width:${pct}%"></div></div>
-    <div class="groups-row">${groups}</div>
-  </div>`;
-}
-
-function render(){
-  const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
-  const balPeriodo = IDX_BAL[p] ? Object.values(IDX_BAL[p]) : [];
-  const indPeriodo = IDX_IND[p] || {};
-  if(!balPeriodo.length) return;
-
-  const[y,m]=p.split('-');
-  document.getElementById('periodLabel').textContent=MESES[parseInt(m)]+' '+y;
-
-  const sorted=[...balPeriodo].sort((a,b)=>b.activos_net-a.activos_net).slice(0,20);
-  const maxActivos=sorted.length?sorted[0].activos_net:1;
-
-  let html='';
-  sorted.forEach((b,i)=>{
-    html+=cardHTML(b, indPeriodo[b.coop], i+1, maxActivos);
-  });
-  document.getElementById('cardsWrap').innerHTML=html;
+    <div class="sec-title">Indicadores <span class="n">· 15 oficiales CONSUCOOP</span></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot a">A</span>Óptimo</div>
+      <div class="legend-item"><span class="legend-dot b">B</span>Aceptable</div>
+      <div class="legend-item"><span class="legend-dot c">C</span>Regular</div>
+      <div class="legend-item"><span class="legend-dot d">D</span>Deficiente</div>
+      <div class="legend-item"><span class="legend-dot e">E</span>Crítico</div>
+      <div class="legend-item"><span class="legend-dot na">N/D</span>Sin dato</div>
+    </div>
+    <div class="groups-card"><div class="groups-row">${groups}</div></div>
+  `;
 }
 </script>
 
 <script id="export-script">
-
 (function(){
   const ALL_PAGES = [
     'afiliados.html',
@@ -354,10 +414,10 @@ function render(){
     const btnSingle = document.createElement('button');
     btnSingle.id = 'btn-export-single';
     btnSingle.className = 'btn-export';
-    btnSingle.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF esta página';
+    btnSingle.innerHTML = '⬇ PDF esta página';
     btnSingle.title = 'Exportar esta vista como PDF';
     btnSingle.addEventListener('click', () => {
-      const wrap = document.querySelector('.cards-wrap');
+      const wrap = document.querySelector('.tbl-wrap');
       if (wrap) {
         wrap.style.overflow = 'visible';
         wrap.style.maxHeight = 'none';
@@ -369,7 +429,7 @@ function render(){
     const btnAll = document.createElement('button');
     btnAll.id = 'btn-export-all';
     btnAll.className = 'btn-export btn-export-all';
-    btnAll.innerHTML = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> PDF completo';
+    btnAll.innerHTML = '📄 PDF completo';
     btnAll.title = 'Exportar todo el dashboard como PDF';
     btnAll.addEventListener('click', exportAll);
 
@@ -442,7 +502,7 @@ function render(){
 </div>
 ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame${i}" onload="frameLoaded(${i})"></iframe></div>`).join('\n')}
 <div id="status">Cargando páginas... (0/${pages.length})</div>
-<button id="print-btn" onclick="window.print()" style="display:none"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir / Guardar PDF</button>
+<button id="print-btn" onclick="window.print()" style="display:none">🖨 Imprimir / Guardar PDF</button>
 <script>
   let loaded = 0;
   const total = ${pages.length};
@@ -451,7 +511,7 @@ ${pages.map((url, i) => `<div class="frame-page"><iframe src="${url}" id="frame$
     document.getElementById('status').textContent = 'Cargando... (' + loaded + '/' + total + ')';
     if (loaded === total) {
       setTimeout(() => {
-        document.getElementById('status').textContent = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px"><polyline points="20 6 9 17 4 12"/></svg> Listo para imprimir';
+        document.getElementById('status').textContent = '✓ Listo para imprimir';
         document.getElementById('print-btn').style.display = 'block';
       }, 4000);
     }
