@@ -99,7 +99,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 .pct-up{color:#16a34a}.pct-dn{color:#dc2626}
 
 /* VIEW 3 — tendencia líneas */
-.chart-wrap{flex:1;min-height:0;position:relative}
+.chart-wrap{flex:1;min-height:420px;position:relative}
 .chart-hint{font-size:10px;color:var(--muted);text-align:center;padding:4px 0 8px;flex-shrink:0}
 
 @keyframes fu{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
@@ -253,8 +253,8 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 <main class="main">
   <div class="ph">
     <div>
-      <div class="ph-title">📊 Análisis de Crecimiento</div>
-      <div class="ph-sub">Top 20 cooperativas — últimos 12 meses</div>
+      <div class="ph-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>Análisis de Crecimiento</div>
+      <div class="ph-sub">Top 20 cooperativas — año en curso vs. cierre del año anterior</div>
     </div>
     <div class="controls">
       <div class="toggle">
@@ -274,12 +274,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
     <div class="kpi kpi-up">
       <div class="kpi-lbl">Crecimiento absoluto</div>
       <div class="kpi-val" id="kAbs">—</div>
-      <div class="kpi-sub">Últimos 12 meses</div>
+      <div class="kpi-sub" id="kAbsSub">Año en curso</div>
     </div>
     <div class="kpi kpi-up">
       <div class="kpi-lbl">Crecimiento %</div>
       <div class="kpi-val" id="kPct">—</div>
-      <div class="kpi-sub">Variación acumulada</div>
+      <div class="kpi-sub" id="kPctSub">Variación acumulada</div>
     </div>
     <div class="kpi kpi-rank">
       <div class="kpi-lbl">Posición en crecimiento %</div>
@@ -300,7 +300,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
     <div style="display:grid;grid-template-columns:180px 1fr 90px 70px;gap:8px;padding:8px 0 4px;
       font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">
       <div style="text-align:right">Cooperativa</div>
-      <div>Crecimiento absoluto</div>
+      <div>Crecimiento absoluto (año en curso vs cierre anterior)</div>
       <div style="text-align:right">Valor</div>
       <div style="text-align:right">%</div>
     </div>
@@ -312,7 +312,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
     <div style="display:grid;grid-template-columns:180px 1fr 90px 70px;gap:8px;padding:8px 0 4px;
       font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;flex-shrink:0">
       <div style="text-align:right">Cooperativa</div>
-      <div>Crecimiento %</div>
+      <div>Crecimiento % (año en curso vs cierre anterior)</div>
       <div style="text-align:right">Valor</div>
       <div style="text-align:right">%</div>
     </div>
@@ -321,7 +321,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 
   <!-- TAB 3: TENDENCIA -->
   <div class="content" id="tabTrend">
-    <div class="chart-hint">Hover sobre una línea para resaltarla — CAYCSOL siempre en verde</div>
+    <div class="chart-hint">Pasa el mouse sobre el gráfico para ver los valores exactos — CAYCSOL siempre en verde</div>
     <div class="chart-wrap">
       <canvas id="trendChart"></canvas>
     </div>
@@ -370,7 +370,9 @@ function render(){
     document.getElementById('kLast').textContent=fmtVal(cay.last);
     document.getElementById('kLastSub').textContent='Al '+fmtP(d.periodos[d.periodos.length-1]);
     document.getElementById('kAbs').textContent=(metrica==='bg'?fmtM(cay.abs):'+'+cay.abs.toLocaleString());
+    document.getElementById('kAbsSub').textContent=d.anioActual+' vs Dic-'+d.anioAnterior;
     document.getElementById('kPct').textContent='+'+cay.pct+'%';
+    document.getElementById('kPctSub').textContent='Variación '+d.anioActual+' vs Dic-'+d.anioAnterior;
     // Ranking por %
     const sorted=Object.entries(growth).sort((a,b)=>b[1].pct-a[1].pct);
     const rankPct=sorted.findIndex(([k])=>k==='CAYCSOL')+1;
@@ -437,7 +439,6 @@ function renderTrend(){
   const labels=periodos.map(fmtP);
   const top20=d.top20;
   const N=periodos.length-1;
-  const trimestral=new Set([3,6,9,12]);
 
   if(trendChart) trendChart.destroy();
 
@@ -475,13 +476,6 @@ function renderTrend(){
     return v.toLocaleString();
   }
 
-  function showLabel(ctx){
-    const p=periodos[ctx.dataIndex];
-    if(!p) return false;
-    const mes=parseInt(p.split('-')[1]);
-    return ctx.dataIndex===0||ctx.dataIndex===N||trimestral.has(mes);
-  }
-
   const datasets=top20.map(coop=>{
     const isCay=coop==='CAYCSOL';
     const isNeigh=neighbors.has(coop);
@@ -505,23 +499,26 @@ function renderTrend(){
       highlight:isNeigh,
       caycsol:isCay,
       datalabels:{
-        display:(ctx)=>isNeigh&&showLabel(ctx),
-        color:color,
-        backgroundColor:'rgba(255,255,255,0.9)',
-        borderRadius:3,
-        padding:{top:1,bottom:1,left:3,right:3},
-        font:{size:9,weight:'700',family:'Arial'},
-        formatter:(v)=>v===null?'':fmtVal(v),
-        anchor:isCay?'end':'start',
-        align:isCay?'top':'bottom',
-        offset:4
+        display:false
       }
     };
   });
 
   // Dataset fantasma para etiquetas de nombre al final de cada línea vecina
-  // Lo hacemos con datalabels en el último punto visible
-  const nameLabels=top20.filter(c=>neighbors.has(c)).map(coop=>{
+  // Lo hacemos con datalabels en el último punto visible. Se escalona
+  // verticalmente según qué tan cerca esté el valor final de cada línea de
+  // las demás, para que no se encimen cuando los montos son parecidos.
+  const neighborList=top20.filter(c=>neighbors.has(c));
+  const lastValOf=coop=>{
+    const raw=d.series[coop]||[];
+    const nn=raw.filter(v=>v!==null);
+    return nn.length?nn[nn.length-1]:0;
+  };
+  const orderByVal=[...neighborList].sort((a,b)=>lastValOf(b)-lastValOf(a));
+  const stagger={};
+  orderByVal.forEach((coop,i)=>{ stagger[coop]=i; });
+
+  const nameLabels=neighborList.map(coop=>{
     const isCay=coop==='CAYCSOL';
     const color=palette[coop]||'#1d4ed8';
     const raw=d.series[coop]||[];
@@ -540,12 +537,15 @@ function renderTrend(){
       caycsol:isCay,
       datalabels:{
         display:(ctx)=>ctx.dataIndex===N,
-        color:color,
+        color:'#fff',
+        backgroundColor:color,
+        borderRadius:4,
+        padding:{top:2,bottom:2,left:5,right:5},
         font:{size:10,weight:'700',family:'Arial'},
         formatter:()=>coop,
         anchor:'end',
         align:'right',
-        offset:6,
+        offset:10+stagger[coop]*16,
         clip:false
       }
     };
@@ -558,7 +558,7 @@ function renderTrend(){
     options:{
       responsive:true,
       maintainAspectRatio:false,
-      layout:{padding:{top:20,right:140,bottom:8,left:8}},
+      layout:{padding:{top:20,right:190,bottom:8,left:8}},
       interaction:{mode:'index',intersect:false},
       plugins:{
         datalabels:{},
@@ -656,13 +656,25 @@ Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw])
     return series;
   }
 
-  function calcGrowth(series) {
+  function calcGrowthYTD(idx, inicioAnio, ultimo, top20, campo, anioActualStr) {
     const g = {};
-    Object.entries(series).forEach(([coop, vals]) => {
-      const nonNull = vals.filter(v => v !== null);
-      if (nonNull.length >= 2) {
-        const first = nonNull[0], last = nonNull[nonNull.length-1];
-        g[coop] = {abs: last-first, pct: Math.round((last-first)/first*1000)/10, last};
+    const periodosAnio = Object.keys(idx).filter(p => p.startsWith(anioActualStr)).sort();
+    top20.forEach(coop => {
+      let first = idx[inicioAnio]?.[coop]?.[campo];
+      // si no hay cierre del año anterior (ej. cooperativa nueva), usar el
+      // primer dato disponible del año en curso como base
+      if (first === undefined || first === null) {
+        for (const p of periodosAnio) {
+          const v = idx[p]?.[coop]?.[campo];
+          if (v !== undefined && v !== null) { first = v; break; }
+        }
+      }
+      const last = idx[ultimo]?.[coop]?.[campo];
+      if (first !== undefined && first !== null && last !== undefined && last !== null) {
+        const pct = first !== 0 ? Math.round((last - first) / first * 1000) / 10 : 0;
+        g[coop] = {abs: last - first, pct, last};
+      } else if (last !== undefined && last !== null) {
+        g[coop] = {abs: 0, pct: 0, last};
       }
     });
     return g;
@@ -677,9 +689,18 @@ Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw])
   const bg_series = buildSeries(bgIdx, last12_bg, top20_bg, 'activos_net');
   const af_series = buildSeries(afIdx, last12_af, top20_af, 'total');
 
+  const anioActual_bg = ultimo_bg.split('-')[0];
+  const inicioAnio_bg = (parseInt(anioActual_bg)-1)+'-12';
+  const anioActual_af = ultimo_af.split('-')[0];
+  const inicioAnio_af = (parseInt(anioActual_af)-1)+'-12';
+
   DATA = {
-    bg: {series: bg_series, periodos: last12_bg, top20: top20_bg, growth: calcGrowth(bg_series)},
-    af: {series: af_series, periodos: last12_af, top20: top20_af, growth: calcGrowth(af_series)},
+    bg: {series: bg_series, periodos: last12_bg, top20: top20_bg,
+         growth: calcGrowthYTD(bgIdx, inicioAnio_bg, ultimo_bg, top20_bg, 'activos_net', anioActual_bg),
+         anioActual: anioActual_bg, anioAnterior: parseInt(anioActual_bg)-1},
+    af: {series: af_series, periodos: last12_af, top20: top20_af,
+         growth: calcGrowthYTD(afIdx, inicioAnio_af, ultimo_af, top20_af, 'total', anioActual_af),
+         anioActual: anioActual_af, anioAnterior: parseInt(anioActual_af)-1},
   };
   render();
 }).catch(e => console.error('Error:', e));
@@ -800,7 +821,7 @@ Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw])
 </head>
 <body>
 <div class="cover">
-  <h1>🏦 Ranking Cooperativo Honduras</h1>
+  <h1>Ranking Cooperativo Honduras</h1>
   <p>Superintendencia de Cooperativas — CONSUCOOP</p>
   <p style="opacity:.6;font-size:13px;margin-top:16px">Data Analyst @Ronfilander</p>
   <p style="opacity:.5;font-size:12px;margin-top:8px">Generado: ${new Date().toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'})}</p>

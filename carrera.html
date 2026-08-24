@@ -228,7 +228,7 @@ canvas{width:100%!important;height:100%!important}
 <main class="main">
   <div class="ph">
     <div class="ph-left">
-      <div class="ph-title">🏅 Carrera por el Top 10</div>
+      <div class="ph-title"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:4px"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>Carrera por el Top 10</div>
       <div class="ph-sub">Evolución del ranking — compara dos periodos</div>
     </div>
     <div class="controls">
@@ -339,7 +339,7 @@ function render(){
 
   // Etiqueta del título
   const tit=metrica==='afiliados'?'Ranking de Afiliados':'Ranking de Activos Netos';
-  document.getElementById('chartTitle').textContent='🏅 Carrera por el Top 10 — '+tit;
+  document.getElementById('chartTitle').textContent='Carrera por el Top 10 — '+tit;
   document.getElementById('chartSub').textContent=fmtPeriodo(pA)+' vs '+fmtPeriodo(pB);
   document.getElementById('legA').textContent=fmtCorto(pA);
   document.getElementById('legB').textContent=fmtCorto(pB);
@@ -618,7 +618,7 @@ Promise.all([RD.loadBalanceGeneral(), RD.loadAfiliados()]).then(([bgRaw, afRaw])
 </head>
 <body>
 <div class="cover">
-  <h1>🏦 Ranking Cooperativo Honduras</h1>
+  <h1>Ranking Cooperativo Honduras</h1>
   <p>Superintendencia de Cooperativas — CONSUCOOP</p>
   <p style="opacity:.6;font-size:13px;margin-top:16px">Data Analyst @Ronfilander</p>
   <p style="opacity:.5;font-size:12px;margin-top:8px">Generado: ${new Date().toLocaleDateString('es-HN', {day:'2-digit',month:'long',year:'numeric'})}</p>
