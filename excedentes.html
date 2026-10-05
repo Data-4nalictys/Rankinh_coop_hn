@@ -206,7 +206,7 @@
   <div class="tbl-wrap">
     <div class="th">
       <div style="text-align:center">#</div><div>Cooperativa</div>
-      <div>Excedentes (M)</div><div style="text-align:right">Egresos</div><div style="text-align:right">Excedentes</div>
+      <div>Excedentes (M)</div><div style="text-align:right">Ingresos</div><div style="text-align:right">Egresos</div>
     </div>
     <div id="rows"><div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div></div>
   </div>
@@ -272,7 +272,7 @@ function render(){
         ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
       </div></div>
       <div class="vc">${fmt(d.ingresos)}</div>
-      <div class="vc ${d.egresos>=0?'pos':'neg'}">${fmt(d.egresos)}</div>
+      <div class="vc">${fmt(d.egresos)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
