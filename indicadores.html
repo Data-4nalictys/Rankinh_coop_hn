@@ -179,20 +179,20 @@ const GRADE_COLOR={a:'#00A651',b:'#92D050',c:'#FFEB0B',d:'#F2A20C',e:'#FF0000'};
 // por ellos mismos (hoja "INDICADORES FINANCIEROS" de su Excel mensual,
 // cargados vía data/Indicadores.csv). Ya no se recalculan aproximaciones acá.
 const INDICATORS=[
-  {code:'1.1',key:'LIMITE_DEUDOR',name:'Límite de Préstamos a un Deudor Afiliado',metaLabel:'≤7.5%',meta:7.5,dir:'asc',group:1},
-  {code:'1.2',key:'CONCENTRACION_FAMILIAR',name:'Concentración Crediticia por Grupo Familiar',metaLabel:'≤10%',meta:10,dir:'asc',group:1},
-  {code:'1.3',key:'CREDITO_VIVIENDA',name:'Créditos a Desarrolladores de Vivienda',metaLabel:'≤10% grupo / 5% c/u',meta:10,dir:'asc',group:1},
-  {code:'2.1',key:'COBERTURA_MORA',name:'Suficiencia de Provisión para Cartera',metaLabel:'≥100%',meta:100,dir:'desc',group:2},
-  {code:'2.2',key:'MOROSIDAD',name:'Índice de Morosidad',metaLabel:'≤5%',meta:5,dir:'asc',group:2},
+  {code:'1.1',key:'LIMITE_DEUDOR',name:'Límite de Préstamos Otorgados a un Deudor Afiliado',metaLabel:'≤5.00%',meta:5,dir:'asc',group:1},
+  {code:'1.2',key:'CONCENTRACION_FAMILIAR',name:'Concentración Crediticia por Grupo Familiar del Deudor Afiliado',metaLabel:'≤7.50%',meta:7.5,dir:'asc',group:1},
+  {code:'1.3',key:'CREDITO_VIVIENDA',name:'Créditos Otorgados a Desarrolladores de Proyectos de Vivienda',metaLabel:'≤10% grupo / 5% c/u',meta:10,dir:'asc',group:1},
+  {code:'2.1',key:'COBERTURA_MORA',name:'Suficiencia de Provisión para la Cartera Crediticia',metaLabel:'≥100%',meta:100,dir:'desc',group:2},
+  {code:'2.2',key:'MOROSIDAD',name:'Índice de Morosidad',metaLabel:'≤12%',meta:12,dir:'asc',group:2},
   {code:'2.3',key:'ACTIVOS_IMPRODUCTIVOS',name:'Activos Improductivos',metaLabel:'≤15%',meta:15,dir:'asc',group:2},
-  {code:'3.1',key:'CAPITAL_INSTITUCIONAL',name:'Índice de Capital Institucional',metaLabel:'≥8.5%',meta:8.5,dir:'desc',group:3},
-  {code:'3.2',key:'PATRIMONIO_COMPROMETIDO',name:'Patrimonio Comprometido por Mora',metaLabel:'<80%',meta:80,dir:'asc',group:3},
-  {code:'3.3',key:'SOLVENCIA_PATRIMONIAL',name:'Índice de Solvencia Patrimonial',metaLabel:'≥10%',meta:10,dir:'desc',group:3},
-  {code:'4.1',key:'COBERTURA_DEPOSITOS_MN',name:'Cobertura Depósitos Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',group:4},
-  {code:'4.2',key:'COBERTURA_DEPOSITOS_ME',name:'Cobertura Depósitos Moneda Extranjera',metaLabel:'≥24%',meta:24,dir:'desc',group:4},
+  {code:'3.1',key:'CAPITAL_INSTITUCIONAL',name:'Índice de Adecuación de Capital Institucional',metaLabel:'≥10%',meta:10,dir:'desc',group:3},
+  {code:'3.2',key:'PATRIMONIO_COMPROMETIDO',name:'Patrimonio Comprometido por Cartera en Mora Mayor a 90 días',metaLabel:'<80%',meta:80,dir:'asc',strict:true,group:3},
+  {code:'3.3',key:'SOLVENCIA_PATRIMONIAL',name:'Índice de Solvencia Patrimonial',metaLabel:'≥20%',meta:20,dir:'desc',group:3},
+  {code:'4.1',key:'COBERTURA_DEPOSITOS_MN',name:'Cobertura de Obligaciones Depositarias en Moneda Nacional',metaLabel:'≥9%',meta:9,dir:'desc',group:4},
+  {code:'4.2',key:'COBERTURA_DEPOSITOS_ME',name:'Cobertura de Obligaciones Depositarias en Moneda Extranjera',metaLabel:'≥24%',meta:24,dir:'desc',sinSaldoA:true,group:4},
   {code:'4.3',key:'COBERTURA_CORTO_PLAZO',name:'Cobertura de Obligaciones de Corto Plazo',metaLabel:'≥110%',meta:110,dir:'desc',group:4},
   {code:'5.1',key:'AUTOSUFICIENCIA',name:'Autosuficiencia Operativa',metaLabel:'≥110%',meta:110,dir:'desc',group:5},
-  {code:'5.2',key:'EFICIENCIA_ACTIVOS_PROD',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',group:5},
+  {code:'5.2',key:'EFICIENCIA_ACTIVOS_PROD',name:'Eficiencia sobre Activos Productivos Netos',metaLabel:'<15%',meta:15,dir:'asc',strict:true,group:5},
   {code:'6.1',key:'ROA',name:'Rentabilidad sobre Activos Netos Promedio',metaLabel:'≥0.50%',meta:0.5,dir:'desc',group:6},
 ];
 const GROUPS=[
@@ -204,13 +204,16 @@ const GROUPS=[
   {n:6,name:'6. Rendimientos y Costos'},
 ];
 
-function gradeOf(meta,dir,v){
-  if(dir==='desc'){
-    const r=v/meta;
-    if(r>=1.3)return 'a'; if(r>=1.0)return 'b'; if(r>=0.85)return 'c'; if(r>=0.6)return 'd'; return 'e';
-  }else{
-    if(v<=meta*0.5)return 'a'; if(v<=meta)return 'b'; if(v<=meta*1.4)return 'c'; if(v<=meta*2)return 'd'; return 'e';
-  }
+function cumpleMeta(meta,dir,v,strict){
+  const x=Math.round(v*100)/100;
+  if(dir==='desc') return x>=meta;
+  return strict ? x<meta : x<=meta;
+}
+function gradeOf(meta,dir,v,strict){
+  if(arguments[4] && v===0) return 'a';
+  if(cumpleMeta(meta,dir,v,strict)) return 'a';
+  const r = dir==='desc' ? (meta>0?v/meta:0) : (v>0?meta/v:1);
+  if(r>=0.95)return 'b'; if(r>=0.80)return 'c'; if(r>=0.60)return 'd'; return 'e';
 }
 function scoreOf(meta,dir,v){
   let s;
@@ -231,8 +234,8 @@ function ringHTML(item,value){
       <div class="ring-code">${item.code}</div>
     </div>`;
   }
-  const grade=gradeOf(item.meta,item.dir,value);
-  const pct=scoreOf(item.meta,item.dir,value);
+  const grade=gradeOf(item.meta,item.dir,value,item.strict,item.sinSaldoA);
+  const pct=grade==='a'?100:scoreOf(item.meta,item.dir,value);
   const color=GRADE_COLOR[grade];
   return `<div class="ring-wrap" title="${item.code} ${item.name} — Meta ${item.metaLabel} · Valor ${fmtPct(value)}">
     <div class="ring" style="--pct:${pct};--rc:${color}">
