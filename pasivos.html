@@ -208,7 +208,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:Arial,s
 </nav>
 <main class="main">
   <div class="ph">
-    <div><div class="ph-title">Ranking de Exigibilidades por Depósitos</div><div class="ph-sub">Top 20 cooperativas · exigibilidades por depósitos y obligaciones</div></div>
+    <div><div class="ph-title">Ranking de Exigibilidades por Depósitos</div><div class="ph-sub">Top 20 cooperativas · exigibilidades por depósitos, obligaciones y patrimonio</div></div>
     <div class="controls">
       <div class="sel-w"><select class="sel" id="selYear"></select></div>
       <div class="sel-w"><select class="sel" id="selMonth"></select></div>
@@ -300,8 +300,8 @@ function render(){
         <div class="bf ${bCls}" style="width:${pct}%">${inside?val:''}</div>
         ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
       </div></div>
-      <div class="vc">${fmt(d.pasivos)}</div>
       <div class="vc">${fmt(d.obligaciones)}</div>
+      <div class="vc">${fmt(d.patrimonio)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
