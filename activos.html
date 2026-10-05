@@ -240,6 +240,11 @@ let ROWS=[],PERIODOS=[],IDX={};
 const selYear=document.getElementById('selYear');
 const selMonth=document.getElementById('selMonth');
 function fmt(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
+// Pasivo total = Activo neto - Patrimonio (identidad del Balance General).
+// El campo 'pasivos' del dataset corresponde a Exigibilidades por Depositos, no al pasivo total.
+function pasivoTotal(d){return (d.activos_net!=null&&d.patrimonio!=null)?d.activos_net-d.patrimonio:null;}
+function fmtPas(d){const v=pasivoTotal(d);return v==null?'—':fmt(v);}
+function fmtPat(d){return d.patrimonio==null?'—':fmt(d.patrimonio);}
 
 RD.loadBalanceGeneral().then(raw=>{
   ROWS=RD.agrupar(raw,['activos_net','activos_tot','prestamos','pasivos','obligaciones','patrimonio','provisiones']);
@@ -330,8 +335,8 @@ function render(){
         <div class="bf ${bCls}" style="width:${pct}%">${inside?val:''}</div>
         ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
       </div></div>
-      <div class="vc">${fmt(d.activos_net)}</div>
-      <div class="vc">${fmt(d.pasivos)}</div>
+      <div class="vc">${fmtPas(d)}</div>
+      <div class="vc">${fmtPat(d)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
