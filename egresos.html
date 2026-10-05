@@ -271,8 +271,8 @@ function render(){
         <div class="bf ${bCls}" style="width:${pct}%">${inside?val:''}</div>
         ${!inside?`<div class="bv-out" style="left:${pct}%">${val}</div>`:''}
       </div></div>
-      <div class="vc">${fmt(d.gast_fin)}</div>
       <div class="vc">${fmt(d.gast_adm)}</div>
+      <div class="vc ${d.excedentes>=0?'pos':'neg'}">${fmt(d.excedentes)}</div>
     </div>`;
   });
   document.getElementById('rows').innerHTML=html;
