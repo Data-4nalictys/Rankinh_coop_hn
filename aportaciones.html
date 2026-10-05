@@ -240,7 +240,7 @@ const selMonth=document.getElementById('selMonth');
 function fmt(n){return (n/1e6).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})+' M';}
 
 RD.loadBalanceGeneral().then(raw=>{
-  ROWS=RD.agrupar(raw,['activos_net','activos_tot','prestamos','pasivos','obligaciones','patrimonio','provisiones']);
+  ROWS=RD.agrupar(raw,['activos_net','activos_tot','prestamos','pasivos','obligaciones','patrimonio','provisiones','aportaciones']);
   PERIODOS=RD.periodos(ROWS);
   IDX=RD.buildIndex(ROWS);
   const ultimo=RD.ultimoPeriodo(ROWS);
@@ -268,11 +268,11 @@ function onYearChange(){
 function render(){
   const p=selYear.value+'-'+String(selMonth.value).padStart(2,'0');
   const allRows=IDX[p]?Object.values(IDX[p]):[];
-  const totalSistema=allRows.reduce((sum,d)=>sum+(d.patrimonio||0),0);
-  const allSorted=[...allRows].sort((a,b)=>b.patrimonio-a.patrimonio);
+  const totalSistema=allRows.reduce((sum,d)=>sum+(d.aportaciones||0),0);
+  const allSorted=[...allRows].sort((a,b)=>b.aportaciones-a.aportaciones);
   const sorted=allSorted.slice(0,20);
   if(!sorted.length) return;
-  const max=sorted[0].patrimonio;
+  const max=sorted[0].aportaciones;
   // Buscar CAYCSOL en TODOS los datos, no solo el top 20
   const cay=allSorted.find(d=>d.coop.includes('CAYCSOL'));
   const t10=allSorted[9];
@@ -283,16 +283,16 @@ function render(){
     const r=allSorted.indexOf(cay)+1;
     document.getElementById('kpiRank').textContent='#'+r;
     document.getElementById('kpiSub').textContent=r<=10?'✓ Top 10':r<=20?'Top 20':'#'+r+' de '+allSorted.length;
-    document.getElementById('kpiVal').textContent=fmt(cay.patrimonio);
+    document.getElementById('kpiVal').textContent=fmt(cay.aportaciones);
     if(t10&&r>10){
       document.getElementById('kpiGapLbl').textContent='Brecha al Top 10';
-      document.getElementById('kpiGap').textContent=fmt(t10.patrimonio-cay.patrimonio);
+      document.getElementById('kpiGap').textContent=fmt(t10.aportaciones-cay.aportaciones);
       document.getElementById('kpiGapSub').textContent='Meta: '+t10.coop;
     }else{
       const below=allSorted[10];
       document.getElementById('kpiGapLbl').textContent='Margen sobre Top 10';
       if(below){
-        document.getElementById('kpiGap').textContent='+'+fmt(cay.patrimonio-below.patrimonio);
+        document.getElementById('kpiGap').textContent='+'+fmt(cay.aportaciones-below.aportaciones);
         document.getElementById('kpiGapSub').textContent='Sobre #11: '+below.coop;
       }else{
         document.getElementById('kpiGap').textContent='Top 10';
@@ -302,12 +302,12 @@ function render(){
   }
   let html='';
   sorted.forEach((d,i)=>{
-    const r=i+1,pct=Math.max(d.patrimonio/max*100,1);
+    const r=i+1,pct=Math.max(d.aportaciones/max*100,1);
     const isCay=d.coop.includes('CAYCSOL');
     const rCls=r===1?'gold':r===2?'silver':r===3?'bronze':'';
     const bCls=isCay?'cc':r===1?'c1':r===2?'c2':r===3?'c3':'cn_';
     const inside=pct>=20;
-    const val=fmt(d.patrimonio);
+    const val=fmt(d.aportaciones);
     html+=`<div class="tr${isCay?' caycsol-row':''}">
       <div class="rn ${rCls}">${r}</div>
       <div class="cn${isCay?' cay':''}">${d.coop}</div>
